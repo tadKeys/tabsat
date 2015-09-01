@@ -1,0 +1,14 @@
+The workflow starts with: "bash subpopulation.sh".
+A seperate directory is created for the all output files.
+The workflow requires a directory containing the .sam input files and a target list in the following format: 
+
+TNR=1 CHR=chr1 START=156627319 END=156627608
+TNR=2 CHR=chr1 START=169555901 END=169556074
+TNR=3 CHR=chr2 START=236401756 END=236402053
+.
+.
+.
+
+Furthermore: 
+-) gawk has to be installed: sudo apt-get install gawk
+-) Perl module "Switch" is required: sudo apt-get install libswitch-perl or cpan; install Switch

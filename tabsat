@@ -1,0 +1,153 @@
+#!/bin/bash
+
+BASE_DIR="/home/app/tabsat"
+FINAL_TABLE="${BASE_DIR}/tools/ait/create_final_table.py"
+R_PLOTTING="${BASE_DIR}/tools/R/lollipop.R"
+METHYL_SUBPOP="${BASE_DIR}/tools/MethylSubpop/subpopulations.sh"
+BISMARK_RUN="${BASE_DIR}/02_meth_pipe.sh"
+JSON_CREATOR="${BASE_DIR}/tools/ait/prepare_json.py"
+
+usage () {
+    echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [list of files] -a aligner <bowtie2|tmap> -o outputdirectory \n"
+}
+
+############# Filtering of parameters
+while getopts ":ht:l:a:d:o:" option; do
+	case "$option" in
+		h) usage
+		   exit 0;;
+		t) target_list=${OPTARG} ;; 
+		l) BS_SEQ=${OPTARG} ;;
+		d) INPUTDIR=${OPTARG} ;;
+		o) OUTPUT_DIR=${OPTARG} ;;
+		a) ALIGNER=${OPTARG};;
+		?) echo "Error: unknown option -$OPTARG" 
+			usage
+			exit 1;;
+	esac
+done 
+shift $(( OPTIND - 1 ))    
+
+echo -e "\n"
+echo -e "##########################"
+echo -e "##  Welcome to TABSAT!  ##"
+echo -e "##########################\n"
+
+
+if [[ $BS_SEQ != "DIR" && $BS_SEQ != "NONDIR" ]]; then
+  echo "Error: You need to specify the BS-Seq library using <dir|nondir> for directional or nondirectional"
+  usage
+  exit 1
+fi
+
+if [ -z "$target_list" ]; then
+  echo "Error: You need to specify a Target file using -t"
+  usage
+  exit 1
+fi
+
+if [ -z "$ALIGNER" ]; then
+  echo "Default aligner for bismark: tmap"
+  ALIGNER="tmap"
+fi
+
+if [[ -z "$INPUTDIR" && -z "$@" ]]; then
+  echo "Error: You have to specify either a directory name using -d or pass a list of files"
+  echo "Example: "
+  usage
+  exit 1
+fi
+
+if [[ ! -d "$INPUTDIR" &&  -z "$@" ]]; then
+  echo "Error: the dir_name argument must be a directory or pass a list of files"
+  exit 1
+fi
+
+if [ -z "$OUTPUT_DIR" ]; then
+  echo "Error: You need to specify an Output directory using -o"
+  usage
+  exit 1
+fi
+
+
+
+############# Create directory for final table and R plots
+if [ -p $INPUTDIR ]
+then
+	FILEARRAY="$@"
+else
+	FILEARRAY="$INPUTDIR/*.fastq" #$@
+fi
+
+
+## Create output dir
+mkdir -p $OUTPUT_DIR
+
+
+COV_DIR="$OUTPUT_DIR"/COVERAGE_"$BS_SEQ"_"$ALIGNER"
+echo "Used coverage directory: $COV_DIR"
+mkdir -p $COV_DIR
+
+
+############# Create directory for methyl subpopulations
+POP_DIR="${COV_DIR}/MethylSubpopulations"
+mkdir -p $POP_DIR
+
+
+############## Run bismark for all input files
+
+## CD into the output dir
+cd ${OUTPUT_DIR}
+
+for file in $FILEARRAY
+	do
+	    current="$(basename "$file" .fastq)"
+	    echo "Basename: ${current}"
+	    echo -e "\nRunning Bismark... \n"
+	    bash ${BISMARK_RUN} ${file} ./$current"_"$BS_SEQ"_"$ALIGNER $target_list $BS_SEQ $ALIGNER
+	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*.cov $COV_DIR
+	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*.sam $POP_DIR
+	done
+
+
+############## Create final table
+echo "-- Creating final table.."
+    python ${FINAL_TABLE} ${target_list} ${COV_DIR}
+echo "-- .. done with table creation."
+
+## Link the final table
+FINAL_TABLE="ResultMethylListOnlyReferenceCpGs.csv"
+ln -s ${COV_DIR}/${FINAL_TABLE}
+
+
+############## Create lollipop plots
+mkdir -p $COV_DIR/PLOTS
+echo "-- Create lollipop plots for every target"
+    Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER}
+echo "-- .. done with plotting."
+rm $COV_DIR/cg*
+
+
+############## Find methyl subpopulations
+bash ${METHYL_SUBPOP} -i ${POP_DIR}
+rm ${POP_DIR}/*sam
+
+
+############## Copy the plots
+echo "-- Copying the plots"
+mkdir plots
+cp ${COV_DIR}/PLOTS/* plots/
+
+
+############## Link the subpopulation result
+mkdir subpopulations
+cp ${COV_DIR}/MethylSubpopulations/Output/* subpopulations/
+
+
+############## Create final JSON file
+python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations
+
+
+
+
+#################################################End of Worfklow#########################################

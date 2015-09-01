@@ -1,0 +1,123 @@
+#!/usr/bin/perl
+
+#start with ./FindMethylSubpopulations.pl <targetlist> <sam file>
+
+use strict;
+use warnings;
+use List::MoreUtils qw(uniq);
+use Switch; # sudo apt-get install libswitch-perl or cpan; install Switch
+
+my $eachline;
+my @samfields;
+my @targets;
+my $modified;
+
+#read in regions of interest
+open (my $regions, "<", $ARGV[0]) or die ("no such file!");
+while(defined($eachline=<$regions>))
+	{
+		chomp $eachline;	
+		push @targets, { split /[\s+=]/, $eachline };
+	}
+close($regions);
+
+my @targetarray= ();
+foreach my $i ( 0 .. scalar @targets-1 ) {
+	my $j = $i+1;
+	push @{ $targetarray[$i] }, ("Target $j; $targets[$j-1]{CHR}; $targets[$j-1]{START}-$targets[$j-1]{END}; $targets[$j-1]{FIRST}-$targets[$j-1]{LAST}");	
+}
+
+#read in samfile
+open(my $samfile, "<", $ARGV[1]) or die "cannot open < $ARGV[1]: $!";
+while(defined($eachline=<$samfile>))
+	{
+		unless ($eachline=~/^@.*/)
+			{
+				@samfields = split("\t", $eachline);
+				chomp($samfields[0]);  # remove whitespaces
+				next if ((length($samfields[9]) < 25) || ($samfields[1] == 16));
+				my $entry = {chro => $samfields[2], start => $samfields[3], leng => length($samfields[9])};
+				  foreach my $elem(@targets){
+				    if(testMatch($entry, $elem)){					
+					next if ($samfields[1] == 16); #only reads on the forward strang 
+					#print "$samfields[0]\t",$elem->{TNR},"\tstart:$samfields[3]\tfirst:",$elem->{FIRST},"\n";
+					#if (($elem->{FIRST} == $elem->{LAST})&&($elem->{FIRST} != 0))
+					#	  {
+					#		$elem->{FIRST} -= $elem->{FIRST};
+					#		$elem->{LAST} += 1;
+					#	  }
+					#print "$elem->{LAST} $elem->{FIRST} $samfields[3] \n";
+					$modified = cigar($samfields[5],$samfields[13]);
+					#next unless ($modified =~ /zZ/);
+					my $length = ($elem->{LAST})-($elem->{FIRST})+1;
+					my $start = ($elem->{FIRST} - $samfields[3]);
+					next if (length($modified) <= $start );
+					#print "$samfields[0] $elem->{LAST} $elem->{FIRST} $samfields[3] $length $start $modified\n";
+					my $modified2 = substr $modified,$start,$length;
+					push @{$targetarray[($elem->{TNR})-1]}, $modified2 if (length($modified2) >= ($elem->{LAST}-$elem->{FIRST}+1)); 
+					}
+					
+  				}
+			}
+	}
+close($samfile);
+
+foreach my $row (@targetarray) {
+	my @hasharray; 
+	foreach my $element (@$row) {	
+		if ($element =~ m/Target/)	
+		 {print "$element\nNumber of matching reads: ", scalar @$row -1,"\n";}
+		else
+		 {push @hasharray, $element;}
+	}
+	my %counts;
+	if (@hasharray)
+	{
+		$counts{$_}++ for @hasharray;
+		print "$counts{$_} \t $_\n" for (sort { $counts{$b} <=> $counts{$a} } keys %counts); #sorted in descending manner 
+	}
+	print "\n";  
+}
+
+#check if read matches with target and cover first and last methylation pattern
+sub testMatch
+{
+  my $elem  = shift;
+  my $range = shift;
+  return    $elem->{chro}  eq $range->{CHR}
+         && $elem->{start} <= $range->{FIRST} 
+         && ($elem->{start} + $elem->{leng})  >= $range->{LAST} 
+}
+
+#considering indels
+sub cigar
+{
+	my $command = shift;
+	my $input   = shift;
+	my $output = "";
+
+	$input =~ s/XM:Z://;
+	$input =~ s/[hHxXuU]/./g;
+
+	while ($command =~ m/(\d+)([MID])/g) {
+	    my $value = $1;
+	    my $code  = $2;
+
+	    switch($code) {
+		case ('D') {
+		    $output .= '.' x $value;
+		}
+		case ('I') {
+		    $input = substr($input, $value);
+		}
+		case ('M') {
+		    $output .= substr($input, 0, $value);
+		    $input = substr($input, $value);
+		}
+	    }
+	}
+	return $output;
+}
+
+
+

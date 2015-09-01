@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#
+# Helper script to call tmap index
+#
+
+./tmap index "$@"
+

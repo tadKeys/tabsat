@@ -1,0 +1,94 @@
+#!/bin/bash
+
+usage () {
+	echo "usage: $0 -s samfile -r reference fasta"
+}
+
+while getopts ":hs:r::" option; do
+	case "$option" in
+		h) usage
+		   exit 0;;
+		s) SAMFILE=$OPTARG ;;
+		r) REFFASTA=$OPTARG ;;		
+		?) echo "Error: unknown option -$OPTARG" 
+			usage
+			exit 1;;
+	esac
+done 
+
+if [ -z "$SAMFILE" ]; then
+  echo "Error: you must specify a samfile using -s"
+  usage
+  exit 1
+fi
+
+
+substring=$(echo $SAMFILE | grep -o -m1 "..genome")
+
+if [ "$substring" == "CTgenome" ]; then
+	#REFFASTA="/home/app/bismark_karina/reference/human/hg19/bismark_tmap/Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa"
+	TARGETLIST="/home/app/bismark_karina/zz_test/targetlist_gatk_CT.intervals"
+elif [ "$substring" == "GAgenome" ]; then
+	#REFFASTA="/home/app/bismark_karina/reference/human/hg19/bismark_tmap/Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"
+	TARGETLIST="/home/app/bismark_karina/zz_test/targetlist_gatk_GA.intervals"
+else
+	exit 1
+fi
+REFFAI=${REFFASTA}".fai"
+REFDICT=${REFFASTA%.fa}".dict"
+
+PICARD="/home/app/bismark_karina/tools/picard-tools-1.119"
+GATK="/home/app/bismark_karina/tools/GATK"
+REORDERSAM="/home/app/bismark_karina/tools/GATK/ReorderSamFields.pl"
+
+
+#Make sure that input file reads and reference have compatible, overlapping contigs
+#substring=$(cat $SAMFILE | grep -o -m1 "\_..\_co\w*") 
+#echo $substring;
+#sed "s|\_..\_converted||g" $SAMFILE > ${SAMFILE%.sam}_intermediate
+
+#create fasta.fai file if missing
+if [ ! -e $REFFAI ]; then
+  samtools faidx $REFFASTA
+fi
+
+#Create .dict file if missing
+if [ ! -e $REFDICT ]; then
+ java -jar $PICARD/CreateSequenceDictionary.jar R=$REFFASTA O=$REFDICT
+fi
+
+#Convert .sam to .bam
+samtools view -S ${SAMFILE} -b -o ${SAMFILE%.sam}.bam
+
+#Sort aligned reads by coordinate order
+java -jar $PICARD/SortSam.jar INPUT=${SAMFILE%.sam}.bam OUTPUT=${SAMFILE%.sam}"_sorted.bam" SORT_ORDER=coordinate #queryname,unsorted or coordinate(needed for IndelRealigner)
+
+#Mark duplicate reads
+#java -jar $PICARD/MarkDuplicates.jar INPUT=${SAMFILE%.sam}"_sorted.bam" OUTPUT=${SAMFILE%.sam}"_dedup.bam" METRICS_FILE=${SAMFILE%.sam}"_metrics.txt"
+
+#Add read group information
+java -jar $PICARD/AddOrReplaceReadGroups.jar INPUT=${SAMFILE%.sam}"_sorted.bam" OUTPUT=${SAMFILE%.sam}"_addrg.bam" RGID=group1 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=sample1 
+#java -jar $PICARD/AddOrReplaceReadGroups.jar INPUT=${SAMFILE%.sam}.bam OUTPUT=${SAMFILE%.sam}"_addrg.bam" RGID=group1 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=sample1 
+
+#Index the BAM file
+#java -jar $PICARD/BuildBamIndex.jar INPUT=${SAMFILE%.sam}"_addrg.bam"
+
+#Run IndelRealigner
+java -jar $GATK/GenomeAnalysisTK.jar -T IndelRealigner -R $REFFASTA -targetIntervals $TARGETLIST -I ${SAMFILE%.sam}"_addrg.bam" -o ${SAMFILE%.sam}"_realigned.bam" 
+
+#Convert realigned bam to sam
+#samtools view -h -o ${SAMFILE%.sam}"_realigned.sam" ${SAMFILE%.sam}"_addrg.bam"
+samtools view -h -o ${SAMFILE%.sam}"_realigned.sam" ${SAMFILE%.sam}"_realigned.bam"
+
+#Reorder optional sam fields
+#perl $REORDERSAM ${SAMFILE%.sam}"_realigned.sam"> ${SAMFILE%.sam}"_realigned_reordered.sam"
+
+cat ${SAMFILE%.sam}"_realigned.sam"
+
+#rm temp* new_file
+
+
+#sed "s|\(chr[A-Za-z0-9\_]*\)|\1$substring|g" ${SAMFILE%.sam}"_realigned.sam" > ${SAMFILE%.sam}_intermediate2
+#sed "s|RG:Z:group1|RG:Z:NOID|g" ${SAMFILE%.sam}"_realigned_reordered.sam" > ${SAMFILE%.sam}_intermediate2
+
+
