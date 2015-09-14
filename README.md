@@ -9,7 +9,7 @@ It performs
 
 Available as
 * Fully configured Virtual Machine [TODO]
-* [Platomics][www.platomics.com] app [TODO]
+* [Platomics](www.platomics.com) app [TODO]
 * Source code
 
 Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
@@ -18,11 +18,11 @@ Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 ```sh
 ./tabsat -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -o outputdirectory [files]
 ```
-**-t** Targetlist in CSV format [TODO example] [mandatory]
-**-l** Library mode of bisulfite experiment
-**-d** List of inputfiles; if not specified, the input files are added at the end [optional]
-**-a** Specify the aligner that should be used
-**-o** Output directory
+**-t** Targetlist in CSV format [TODO example] [mandatory]</br>
+**-l** Library mode of bisulfite experiment</br>
+**-d** List of inputfiles; if not specified, the input files are added at the end [optional]</br>
+**-a** Specify the aligner that should be used</br>
+**-o** Output directory</br>
 
 #### Examples
 Test with input file directory
@@ -37,7 +37,7 @@ tabsat -l NONDIR -t target.csv -o test_output_files xy.fastq abs.fastq
 
 ## Installation
 * Check out the project
-* Download the reference genome [TODO]
+* Download the reference genome [ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.gz](Example dowload)
 * Prepare the reference genome
 ```sh
 $ tabsat/reference/prepareReference.sh
