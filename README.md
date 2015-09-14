@@ -36,8 +36,8 @@ tabsat -l NONDIR -t target.csv -o test_output_files xy.fastq abs.fastq
 
 
 ## Installation
-* Check out the project
-* Download the reference genome [ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.gz](Example dowload)
+* Check out the project (git clone)
+* Download the reference genome - [Example dowload](ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.gz)
 * Prepare the reference genome
 ```sh
 $ tabsat/reference/prepareReference.sh
