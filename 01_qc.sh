@@ -1,6 +1,7 @@
 #!/bin/bash
 
-BASE_DIR="/home/app/tabsat"
+USER_HOME=$HOME
+BASE_DIR="${USER_HOME}/tabsat"
 PRINSEQLITE="${BASE_DIR}/tools/prinseq-lite-0.20.4/prinseq-lite.pl"
 PRINSEQGRAPHS="${BASE_DIR}/tools/prinseq-lite-0.20.4/prinseq-graphs-noPCA.pl"
 

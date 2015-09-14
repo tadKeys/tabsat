@@ -20,7 +20,8 @@ while getopts ":hi:" option; do
     esac
 done
 
-HOMEDIR="/home/app/tabsat/tools/MethylSubpop"
+USER_HOME=$HOME
+HOMEDIR="${USER_HOME}/tabsat/tools/MethylSubpop"
 TARGET="${HOMEDIR}/target.txt"
 OUTDIR="${INDIR}/Output"
 

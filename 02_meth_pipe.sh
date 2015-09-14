@@ -1,6 +1,7 @@
 #!/bin/bash
 
-BASE_DIR="/home/app/tabsat"
+USER_HOME=$HOME
+BASE_DIR="${USER_HOME}/tabsat"
 TOOLS="${BASE_DIR}/tools"
 
 PRINSEQLITE="${TOOLS}/prinseq-lite-0.20.4/prinseq-lite.pl"
@@ -89,7 +90,6 @@ SCRIPT=${SCRIPT_TMAP}
 SCRIPT_METH_EXT=${SCRIPT_METH_TMAP}                                                                                                                                       
 fi 
 
-#rm /home/app/bismark_karina/zz_test/PGM_METH/*
 
 ##
 ## Create output folder

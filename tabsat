@@ -1,6 +1,7 @@
 #!/bin/bash
 
-BASE_DIR="/home/app/tabsat"
+USER_HOME=$HOME
+BASE_DIR="${USER_HOME}/tabsat"
 FINAL_TABLE="${BASE_DIR}/tools/ait/create_final_table.py"
 R_PLOTTING="${BASE_DIR}/tools/R/lollipop.R"
 METHYL_SUBPOP="${BASE_DIR}/tools/MethylSubpop/subpopulations.sh"
@@ -8,7 +9,7 @@ BISMARK_RUN="${BASE_DIR}/02_meth_pipe.sh"
 JSON_CREATOR="${BASE_DIR}/tools/ait/prepare_json.py"
 
 usage () {
-    echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [list of files] -a aligner <bowtie2|tmap> -o outputdirectory \n"
+    echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -o outputdirectory [files] \n"
 }
 
 ############# Filtering of parameters
@@ -137,6 +138,15 @@ rm ${POP_DIR}/*sam
 echo "-- Copying the plots"
 mkdir plots
 cp ${COV_DIR}/PLOTS/* plots/
+
+
+############## Convert all plots to pngs
+cd plots
+for file in `ls *.pdf`
+do
+    convert -density 180 ${file} -quality 100 "${file}.png"
+done
+cd ..
 
 
 ############## Link the subpopulation result

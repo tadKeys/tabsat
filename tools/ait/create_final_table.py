@@ -17,7 +17,7 @@ cov_sum_cutoff=4
 cov_pos_cutoff=2
 
 ## file containing all cpgs
-file_all_cgps = "/home/app/tabsat/tools/ait/all_cpgs_only_pos.txt"
+file_all_cgps = os.environ['HOME'] + "/tabsat/tools/ait/all_cpgs_only_pos.txt"
 
 
 #
