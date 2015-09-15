@@ -20,9 +20,11 @@ Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 ```
 **-t** Targetlist in CSV format [TODO example] [mandatory]</br>
 **-l** Library mode of bisulfite experiment</br>
-**-d** List of inputfiles; if not specified, the input files are added at the end [optional]</br>
 **-a** Specify the aligner that should be used</br>
+**-m** This parameter is used for filtering reads that are shorter than the given threshold.
+**-q** Bases that are below the given threshold are removed from the 3’ end of the reads (read trimming)
 **-o** Output directory</br>
+**-d** List of inputfiles; if not specified, the input files are added at the end [optional]</br>
 
 #### Examples
 Test with input file directory
