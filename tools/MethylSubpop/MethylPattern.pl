@@ -28,8 +28,12 @@ foreach my $i ( 0 .. scalar @targets-1 ) {
 	push @{ $targetarray[$i] }, ("Target $j; $targets[$j-1]{CHR}; $targets[$j-1]{START}-$targets[$j-1]{END}");	
 }
 
-#read in samfile
+# Read in samfile
 open(my $samfile, "<", $ARGV[1]) or die "cannot open < $ARGV[1]: $!";
+
+## Get the percent target parameter
+my $percent_target = $ARGV[2];
+
 while(defined($eachline=<$samfile>))
 	{
 		unless ($eachline=~/^@.*/)
@@ -39,7 +43,7 @@ while(defined($eachline=<$samfile>))
 				next if ($samfields[1] == 16);
 				my $entry = {chro => $samfields[2], start => $samfields[3], leng => length($samfields[9])};
 				  foreach my $elem(@targets){
-				    if(testMatch($entry, $elem)){
+				    if(testMatch($entry, $elem, $percent_target)){
 					my $adap1 =""; #filling gaps of read in the if it is shorter than the whole read
 					$adap1 = "*"x ($samfields[3] - $elem->{START}) if ($samfields[3] > $elem->{START});
 					$modified = cigar($samfields[5],$samfields[13]);
@@ -49,6 +53,8 @@ while(defined($eachline=<$samfile>))
 			}
 	}
 close($samfile);
+
+
 
 foreach my $row (@targetarray) {
     foreach my $element (uniq @$row) {	
@@ -63,11 +69,12 @@ sub testMatch
 {
   my $elem  = shift;
   my $range = shift;
+  my $cpg_spanning_threshold = shift;
 
   return    $elem->{chro}   eq $range->{CHR}
          && $elem->{start} >= $range->{START} 
-         && $elem->{start} <= $range->{START}+(($range->{END})-($range->{START})+1)*0.2
-         && $elem->{leng}   >= (($range->{END})-($range->{START})+1)*0.8 
+         && $elem->{start} <= $range->{START}+(($range->{END})-($range->{START})+1)*(1-$cpg_spanning_threshold) # was 0.2
+         && $elem->{leng}   >= (($range->{END})-($range->{START})+1)*$cpg_spanning_threshold
   ;
 }
 

@@ -3,17 +3,18 @@
 # gawk is required: sudo apt-get install gawk
 
 usage () {
-    echo "usage: $0 -i <input directory>"
+    echo "usage: $0 -i <input directory> -p percent_target"
 }
 
 echo "Starting with methylation pattern analysis"
 
 #Filerting of parameters
-while getopts ":hi:" option; do
+while getopts "hi:p:" option; do
     case "$option" in
 	h) usage
-	   exit 0;;
+	   exit 0 ;;
 	i) INDIR=${OPTARG} ;;
+	p) PERCENT_TARGET=${OPTARG} ;;
 	?) echo "Error: unknown option $OPTARG"
 	   usage
 	   exit 1;;
@@ -33,7 +34,7 @@ for file in $INDIR/*.sam
 		do
 			current="$(basename "$file" trimmed.fastq_bismark_tmap.sam)"			
 			echo "Whole Target for $file"
-			perl $HOMEDIR/MethylPattern.pl $TARGET ${file} > $OUTDIR/$current'WholeTarget.txt'
+			perl $HOMEDIR/MethylPattern.pl $TARGET ${file} ${PERCENT_TARGET} > $OUTDIR/$current'WholeTarget.txt'
 			echo "Intermediate Positions for $file"
 			perl $HOMEDIR/FindMethylPositions.pl $OUTDIR/$current'WholeTarget.txt' > $OUTDIR/$current'MethylPositionsIntermediate.txt'
 			echo "Paste intermediate Positions for $file"

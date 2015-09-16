@@ -22,11 +22,15 @@ FINAL_TABLE="${TOOLS}/ait/create_final_table.py"
 export PATH="${TOOLS}/iontorrent/:$PATH"
 export PATH="${TOOLS}/bowtie2/bowtie2-2.2.4/:$PATH"
 
+
+echo $@
+
+
 if [ -n "$1" ];
 then
-file=${1}
+    file=${1}
 else
-echo "-- Please specify a file"
+    echo "-- Please specify a file"
 exit
 fi
 
@@ -59,14 +63,36 @@ exit
 fi
 
 
-if [[ $5 ]];                                                                                                                                            
-then                                                                                                              
-aligner=${5}                                                                                                                                        
-echo "$aligner"                                                                                                                                     
-else                                                                                                                                                    
-echo "-- Please specify the aligner: bowtie2 or tmap"                                                                              
-exit                                                                                                                                                    
+if [[ $5 ]];
+then
+    aligner=${5}
+    echo "$aligner"
+else
+    echo "-- Please specify the aligner: bowtie2 or tmap"
+exit
 fi 
+
+
+if [[ $6 ]];
+then
+    param_min_length=${6}
+else
+    param_min_length="8"
+fi
+echo "param_min_length: ${param_min_length}"
+
+
+if [[ $7 ]];
+then
+    param_min_qual=${7}
+else
+    param_min_qual="20"
+fi
+echo "param_min_qual: ${param_min_qual}"
+
+
+
+
 
 
 if [ $seq_library == "NONDIR" ]
@@ -77,18 +103,26 @@ else
 seq_lib=""
 fi
 
-if [ $aligner == "bowtie2" ]                                                                                                                         
-then                                                                                                                                                    
-aligner="--bowtie2"
-REFPATH=${REFPATH_BOWTIE2}
-SCRIPT=${SCRIPT_BOWTIE2}
-SCRIPT_METH_EXT=${SCRIPT_METH_BOWTIE2}                                                                                                           
+if [ $aligner == "bowtie2" ]
+then
+    aligner="--bowtie2"
+    REFPATH=${REFPATH_BOWTIE2}
+    SCRIPT=${SCRIPT_BOWTIE2}
+    SCRIPT_METH_EXT=${SCRIPT_METH_BOWTIE2}
 else
-aligner="--tmap -E 1 -g 3"
-REFPATH=${REFPATH_TMAP}
-SCRIPT=${SCRIPT_TMAP}
-SCRIPT_METH_EXT=${SCRIPT_METH_TMAP}                                                                                                                                       
+    aligner="--tmap -E 1 -g 3"
+    REFPATH=${REFPATH_TMAP}
+    SCRIPT=${SCRIPT_TMAP}
+    SCRIPT_METH_EXT=${SCRIPT_METH_TMAP}
 fi 
+
+
+##
+## Start with the work
+##
+
+
+
 
 
 ##
@@ -98,13 +132,20 @@ mkdir -p $outputfolder
 
 
 ##
+## Call QC module for the first time
+##
+
+${QC_MODULE} ${file} ${outputfolder}
+
+
+##
 ## Prinseq filtering and trimming
 ##
 
-echo "-- Performing Fastq filtering/trimming (filter min-length: 8bp, trim 3' end quality <20)"
+echo "-- Performing Fastq filtering/trimming (filter min-length: ${param_min_length}bp, trim 3' end quality <${param_min_qual})"
 
 FILENAME=`basename ${file} .fastq`
-perl ${PRINSEQLITE} -fastq ${file} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len 8 -trim_qual_right 20 -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming.log
+perl ${PRINSEQLITE} -fastq ${file} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len ${param_min_length} -trim_qual_right ${param_min_qual} -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming.log
 
 echo "-- ... done performing filtering/trimming"
 

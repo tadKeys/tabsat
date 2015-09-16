@@ -400,13 +400,15 @@ def filterNotReferenceCpGs(result_file, filtered_file):
 
 
 
+##
+## MAIN MAIN MAIN
+##
 
 
 
 
 
-
-print "generating methyl list"
+print "Generating final output table"
 
 print "- reading cutoff config"
 
@@ -432,6 +434,15 @@ dir_cov_file = sys.argv[2]
 
 print "- initial_list_file: " + str(initial_list_file)
 print "- dir_cov_file: " + str(dir_cov_file)
+
+
+## Reading hard cutoff value
+if len(sys.argv) > 3:
+    print "- using the read cutoff specified by the user"
+    read_cutoff = int(sys.argv[3])
+
+print "- read_cutoff: " + str(read_cutoff)
+
 
 
 prepareInitalList(initial_list_file, dir_cov_file)

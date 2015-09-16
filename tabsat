@@ -9,19 +9,24 @@ BISMARK_RUN="${BASE_DIR}/02_meth_pipe.sh"
 JSON_CREATOR="${BASE_DIR}/tools/ait/prepare_json.py"
 
 usage () {
-    echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -o outputdirectory [files] \n"
+    echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -m min_read_length -q min_read_qual -p percent_target_for_patterns -r min_number_reads_cpg -o outputdirectory [files] \n"
 }
 
+
 ############# Filtering of parameters
-while getopts ":ht:l:a:d:o:" option; do
+while getopts ":ht:l:d:o:a:m:q:p:r:" option; do
 	case "$option" in
 		h) usage
-		   exit 0;;
-		t) target_list=${OPTARG} ;; 
-		l) BS_SEQ=${OPTARG} ;;
-		d) INPUTDIR=${OPTARG} ;;
-		o) OUTPUT_DIR=${OPTARG} ;;
+		   exit 0 ;;
+		t) TARGET_LIST=${OPTARG};;
+		l) BS_SEQ=${OPTARG};;
+		d) INPUTDIR=${OPTARG};;
+		o) OUTPUT_DIR=${OPTARG};;
 		a) ALIGNER=${OPTARG};;
+		m) MIN_READ_LEN=${OPTARG};;
+		q) MIN_READ_QUAL=${OPTARG};;
+		p) PERCENT_TARGET=${OPTARG};;
+		r) READ_CUTOFF=${OPTARG};;
 		?) echo "Error: unknown option -$OPTARG" 
 			usage
 			exit 1;;
@@ -35,13 +40,15 @@ echo -e "##  Welcome to TABSAT!  ##"
 echo -e "##########################\n"
 
 
+
+
 if [[ $BS_SEQ != "DIR" && $BS_SEQ != "NONDIR" ]]; then
   echo "Error: You need to specify the BS-Seq library using <dir|nondir> for directional or nondirectional"
   usage
   exit 1
 fi
 
-if [ -z "$target_list" ]; then
+if [ -z "$TARGET_LIST" ]; then
   echo "Error: You need to specify a Target file using -t"
   usage
   exit 1
@@ -51,6 +58,31 @@ if [ -z "$ALIGNER" ]; then
   echo "Default aligner for bismark: tmap"
   ALIGNER="tmap"
 fi
+
+if [ -z "${MIN_READ_QUAL}" ]; then
+  echo "Minimum read qual not specified. Setting it to 20"
+  MIN_READ_QUAL="20"
+fi
+echo "MIN_READ_QUAL: ${MIN_READ_QUAL}"
+
+if [ -z "$MIN_READ_LEN" ]; then
+  echo "Minimum read length not specified. Setting it to 8"
+  MIN_READ_LEN="8"
+fi
+echo "MIN_READ_LEN: ${MIN_READ_LEN}"
+
+if [ -z "$PERCENT_TARGET" ]; then
+  echo "Percent Target not specified. Setting it to 0.8"
+  PERCENT_TARGET="0.8"
+fi
+echo "PERCENT_TARGET: ${PERCENT_TARGET}"
+
+if [ -z "$READ_CUTOFF" ]; then
+  echo "Read cutoff not specified. Setting it to 0"
+  READ_CUTOFF="0"
+fi
+echo "READ_CUTOFF: ${READ_CUTOFF}"
+
 
 if [[ -z "$INPUTDIR" && -z "$@" ]]; then
   echo "Error: You have to specify either a directory name using -d or pass a list of files"
@@ -69,6 +101,10 @@ if [ -z "$OUTPUT_DIR" ]; then
   usage
   exit 1
 fi
+
+
+
+
 
 
 
@@ -105,7 +141,7 @@ for file in $FILEARRAY
 	    current="$(basename "$file" .fastq)"
 	    echo "Basename: ${current}"
 	    echo -e "\nRunning Bismark... \n"
-	    bash ${BISMARK_RUN} ${file} ./$current"_"$BS_SEQ"_"$ALIGNER $target_list $BS_SEQ $ALIGNER
+	    bash ${BISMARK_RUN} ${file} ./$current"_"$BS_SEQ"_"$ALIGNER $TARGET_LIST $BS_SEQ $ALIGNER $MIN_READ_LEN $MIN_READ_QUAL
 	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*.cov $COV_DIR
 	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*.sam $POP_DIR
 	done
@@ -113,7 +149,7 @@ for file in $FILEARRAY
 
 ############## Create final table
 echo "-- Creating final table.."
-    python ${FINAL_TABLE} ${target_list} ${COV_DIR}
+    python ${FINAL_TABLE} ${TARGET_LIST} ${COV_DIR} ${READ_CUTOFF}
 echo "-- .. done with table creation."
 
 ## Link the final table
@@ -130,8 +166,8 @@ rm $COV_DIR/cg*
 
 
 ############## Find methyl subpopulations
-bash ${METHYL_SUBPOP} -i ${POP_DIR}
-rm ${POP_DIR}/*sam
+echo "CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}"
+bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}
 
 
 ############## Copy the plots
