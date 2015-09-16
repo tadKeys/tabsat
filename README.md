@@ -23,7 +23,7 @@ Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 **-a** Specify the aligner that should be used<br />
 **-m** This parameter is used for filtering reads that are shorter than the given threshold.<br />
 **-q** Bases that are below the given threshold are removed from the 3’ end of the reads (read trimming)<br />
-**-c** Percent of CpGs covered by a read for pattern creation. This value specifies the percent of CpGs that need to be covered by a read to include it for pattern analysis.<br />
+**-c** Percent of target covered by a read for pattern creation. This value specifies the percent of the target that needs to be covered by a read to include it for pattern analysis.<br />
 **-o** Output directory<br />
 **-d** List of inputfiles; if not specified, the input files are added at the end [optional]<br />
 
