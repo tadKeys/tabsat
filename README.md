@@ -9,20 +9,24 @@ It performs
 
 Available as
 * Fully configured Virtual Machine [TODO]
-* [Platomics][www.platomics.com] app [TODO]
+* [Platomics](www.platomics.com) app [TODO]
 * Source code
 
 Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 
-## Use
+## Example usage
 ```sh
-./tabsat -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -o outputdirectory [files]
+${TABSAT} -l NONDIR -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir input.fastq
 ```
-**-t** Targetlist in CSV format [TODO example] [mandatory]
-**-l** Library mode of bisulfite experiment
-**-d** List of inputfiles; if not specified, the input files are added at the end [optional]
-**-a** Specify the aligner that should be used
-**-o** Output directory
+**-t** Targetlist in CSV format [TODO example] [mandatory]<br />
+**-l** Library mode of bisulfite experiment<br />
+**-a** Specify the aligner that should be used<br />
+**-m** This parameter is used for filtering reads that are shorter than the given threshold.<br />
+**-q** Bases that are below the given threshold are removed from the 3’ end of the reads (read trimming)<br />
+**-p** Percent of target covered by a read for pattern creation. This value specifies the percent of the target that needs to be covered by a read to include it for pattern analysis.<br />
+**-r**: Minimum number of mapped reads that need to be present at each CpG site.	<br />
+**-o** Output directory<br />
+**-d** List of inputfiles; if not specified, the input files are added at the end [optional]<br />
 
 #### Examples
 Test with input file directory
@@ -36,8 +40,8 @@ tabsat -l NONDIR -t target.csv -o test_output_files xy.fastq abs.fastq
 
 
 ## Installation
-* Check out the project
-* Download the reference genome [TODO]
+* Check out the project (git clone)
+* Download the reference genome - [Example dowload](ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.gz)
 * Prepare the reference genome
 ```sh
 $ tabsat/reference/prepareReference.sh
