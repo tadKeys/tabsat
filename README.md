@@ -18,13 +18,14 @@ Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 ```sh
 ./tabsat -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -o outputdirectory [files]
 ```
-**-t** Targetlist in CSV format [TODO example] [mandatory]</br>
-**-l** Library mode of bisulfite experiment</br>
-**-a** Specify the aligner that should be used</br>
-**-m** This parameter is used for filtering reads that are shorter than the given threshold.</br>
-**-q** Bases that are below the given threshold are removed from the 3’ end of the reads (read trimming)</br>
-**-o** Output directory</br>
-**-d** List of inputfiles; if not specified, the input files are added at the end [optional]</br>
+**-t** Targetlist in CSV format [TODO example] [mandatory]<br />
+**-l** Library mode of bisulfite experiment<br />
+**-a** Specify the aligner that should be used<br />
+**-m** This parameter is used for filtering reads that are shorter than the given threshold.<br />
+**-q** Bases that are below the given threshold are removed from the 3’ end of the reads (read trimming)<br />
+**-c** Percent of CpGs covered by a read for pattern creation. This value specifies the percent of CpGs that need to be covered by a read to include it for pattern analysis.<br />
+**-o** Output directory<br />
+**-d** List of inputfiles; if not specified, the input files are added at the end [optional]<br />
 
 #### Examples
 Test with input file directory
