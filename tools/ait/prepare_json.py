@@ -112,7 +112,7 @@ def insert_spacer_file_path(the_file, the_folder):
 
 def get_plots_to_name(plot_directory, name):
 
-    files = glob.glob(os.path.join(plot_directory, "*" + name + ".pdf"))
+    files = glob.glob(os.path.join(plot_directory, "*" + name + ".pdf.png"))
 
     ## DEBUG
     #print "Getting plots to name"
