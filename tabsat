@@ -136,6 +136,9 @@ mkdir -p $POP_DIR
 ## CD into the output dir
 cd ${OUTPUT_DIR}
 
+## Create qc dir
+mkdir qc
+
 for file in $FILEARRAY
 	do
 	    current="$(basename "$file" .fastq)"
@@ -144,6 +147,7 @@ for file in $FILEARRAY
 	    bash ${BISMARK_RUN} ${file} ./$current"_"$BS_SEQ"_"$ALIGNER $TARGET_LIST $BS_SEQ $ALIGNER $MIN_READ_LEN $MIN_READ_QUAL
 	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*.cov $COV_DIR
 	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*.sam $POP_DIR
+	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*html qc
 	done
 
 
@@ -190,8 +194,9 @@ mkdir subpopulations
 cp ${COV_DIR}/MethylSubpopulations/Output/* subpopulations/
 
 
+
 ############## Create final JSON file
-python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations
+python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc
 
 
 

@@ -18,8 +18,15 @@ class TabsatOutput:
         if subpop_files:
             return insert_spacer_file_path(subpop_files[0], "subpopulations")
 
+    def _get_qc_to_name(self, qc_directory, sample_name):
+        qc_files = glob.glob(os.path.join(qc_directory, "*" + sample_name + "*.html"))
 
-    def _add_to_sample_dict(self, row, field, the_field_name, subpopulation_directory):
+        if qc_files and len(qc_files) > 1:
+            qc_files_sorted = sorted(qc_files)
+            return (insert_spacer_file_path(qc_files_sorted[0], "qc"),insert_spacer_file_path(qc_files_sorted[1], "qc"))
+
+
+    def _add_to_sample_dict(self, row, field, the_field_name, subpopulation_directory, qc_directory):
         if field.startswith(the_field_name):
             sample = field.strip(the_field_name)
             self.sample_dict[sample][the_field_name] = row[field]
@@ -28,8 +35,13 @@ class TabsatOutput:
             if "subpopulations_path" not in self.sample_dict[sample]:
                 self.sample_dict[sample]["subpopulations_path"] = self._get_subpop_to_name(subpopulation_directory, sample)
 
+            if "qc_before_path" not in self.sample_dict[sample]:
+                self.sample_dict[sample]["qc_before_path"] = self._get_qc_to_name(qc_directory, sample)[0]
+            if "qc_after_path" not in self.sample_dict[sample]:
+                self.sample_dict[sample]["qc_after_path"] = self._get_qc_to_name(qc_directory, sample)[1]
 
-    def __init__(self, row, plot_directory, subpopulation_directory, zip_file_path):
+
+    def __init__(self, row, plot_directory, subpopulation_directory, qc_directory, zip_file_path):
         self.name = row["Name"]
         self.chr = row["chr"]
         self.start = row["start"]
@@ -41,9 +53,9 @@ class TabsatOutput:
         self.sample_dict = defaultdict(dict)
 
         for field in row:
-            self._add_to_sample_dict(row, field, "Reads % ME_", subpopulation_directory)
-            self._add_to_sample_dict(row, field, "Reads UM_", subpopulation_directory)
-            self._add_to_sample_dict(row, field, "Reads ME_", subpopulation_directory)
+            self._add_to_sample_dict(row, field, "Reads % ME_", subpopulation_directory, qc_directory)
+            self._add_to_sample_dict(row, field, "Reads UM_", subpopulation_directory, qc_directory)
+            self._add_to_sample_dict(row, field, "Reads ME_", subpopulation_directory, qc_directory)
 
 
         ## Append the plot information
@@ -162,7 +174,7 @@ def create_zip_of_output(plot_directory, subpopulation_directory, final_table):
 
 
 
-def do(final_table, plot_directory, subpopulation_directory, zip_file_path):
+def do(final_table, plot_directory, subpopulation_directory, qc_directory, zip_file_path):
 
     print "Creating final JSON file from " + str(final_table) + " using plot directory: '" + \
           str(plot_directory + "' and subpop dir: '" + str(subpopulation_directory)) + "'"
@@ -204,7 +216,7 @@ def do(final_table, plot_directory, subpopulation_directory, zip_file_path):
         for row in reader:
 
             ## Build the Tabsat Output
-            tso = TabsatOutput(row, plot_directory, subpopulation_directory, zip_file_path)
+            tso = TabsatOutput(row, plot_directory, subpopulation_directory, qc_directory, zip_file_path)
 
             ## Dump it into the JSON file
             json.dump(tso.get_json_dump(), json_file)
@@ -257,11 +269,16 @@ def main():
         print "Subpopulation directory does not exist: " + str(final_table)
         sys.exit()
 
+    qc_directory = sys.argv[4]
+    if not os.path.exists(qc_directory):
+        print "QC directory does not exist: " + str(final_table)
+        sys.exit()
+
     ## Create the ZIP file
     zip_file_path = create_zip_of_output(plot_directory, subpopulation_directory, final_table)
 
     ## Call the script
-    do(final_table, plot_directory, subpopulation_directory, zip_file_path)
+    do(final_table, plot_directory, subpopulation_directory, qc_directory, zip_file_path)
 
     ## Create the report config json -> needed for the report
     create_report_config_json()
