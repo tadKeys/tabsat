@@ -144,7 +144,7 @@ def encode_pdf_base64(file_path):
     return None
 
 
-def create_zip_of_output(plot_directory, subpopulation_directory, final_table):
+def create_zip_of_output(plot_directory, subpopulation_directory, qc_directory, final_table):
 
     ## All plots
     plots = glob.glob(os.path.join(plot_directory, "*.pdf"))
@@ -152,6 +152,8 @@ def create_zip_of_output(plot_directory, subpopulation_directory, final_table):
     final_subpops = glob.glob(os.path.join(subpopulation_directory, "*FinalSubpop.txt"))
     ## Final sample comparison
     sample_comp_subpops = glob.glob(os.path.join(subpopulation_directory, "*SampleComparision*"))
+    ## QC files
+    qc_files = glob.glob(os.path.join(qc_directory, "*html"))
 
     zip_file_path = "final.zip"
 
@@ -164,6 +166,9 @@ def create_zip_of_output(plot_directory, subpopulation_directory, final_table):
 
         for sample_comp_subpop in sample_comp_subpops:
             my_zip.write(sample_comp_subpop)
+
+        for qc_file in qc_files:
+            my_zip.write(qc_file)
 
         my_zip.write(final_table)
 
