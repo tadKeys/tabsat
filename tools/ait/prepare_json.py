@@ -280,7 +280,7 @@ def main():
         sys.exit()
 
     ## Create the ZIP file
-    zip_file_path = create_zip_of_output(plot_directory, subpopulation_directory, final_table)
+    zip_file_path = create_zip_of_output(plot_directory, subpopulation_directory, qc_directory, final_table)
 
     ## Call the script
     do(final_table, plot_directory, subpopulation_directory, qc_directory, zip_file_path)
