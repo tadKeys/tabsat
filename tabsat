@@ -139,16 +139,43 @@ cd ${OUTPUT_DIR}
 ## Create qc dir
 mkdir qc
 
+## Create idxstats dir
+mkdir idxstats
+
+echo -e "\n\n"
+
+base_pwd_dir=`pwd`
+
 for file in $FILEARRAY
-	do
-	    current="$(basename "$file" .fastq)"
-	    echo "Basename: ${current}"
-	    echo -e "\nRunning Bismark... \n"
-	    bash ${BISMARK_RUN} ${file} ./$current"_"$BS_SEQ"_"$ALIGNER $TARGET_LIST $BS_SEQ $ALIGNER $MIN_READ_LEN $MIN_READ_QUAL
-	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*.cov $COV_DIR
-	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*.sam $POP_DIR
-	    cp ./$current"_"$BS_SEQ"_"$ALIGNER/*html qc
-	done
+do
+    current="$(basename "$file" .fastq)"
+    current_dir="${base_pwd_dir}/${current}_${BS_SEQ}_${ALIGNER}"
+    echo "Basename: ${current}"
+    echo "current_dir: ${current_dir}"
+    echo -e "\nRunning Bismark... \n"
+    bash ${BISMARK_RUN} ${file} ${current_dir} $TARGET_LIST $BS_SEQ $ALIGNER $MIN_READ_LEN $MIN_READ_QUAL
+    echo -e "Copying files \n"
+    echo "cp ${current_dir}/*.cov $COV_DIR"
+    /bin/bash -c "cp ${current_dir}/*.cov ${COV_DIR}/"
+    /bin/bash -c "cp ${current_dir}/*.sam ${POP_DIR}/"
+    /bin/bash -c "cp ${current_dir}/*html qc"
+
+    ## Create samtools stats
+    current_sam="${current_dir}/${current}_trimmed.fastq_bismark_${ALIGNER}.sam"
+    current_bam="${current_dir}/${current}.bam"
+
+    echo "samtools view -S -b ${current_sam} > ${current_bam}"
+    samtools view -S -b ${current_sam} > ${current_bam}
+
+    echo "samtools sort ${current_bam} ${current_bam}.sorted"
+    samtools sort ${current_bam} ${current_bam}.sorted
+
+    echo "samtools index ${current_bam}.sorted.bam"
+    samtools index ${current_bam}.sorted.bam
+
+    samtools idxstats "${current_bam}.sorted.bam" > "${current_dir}/${current}.idxstats"
+    cp "${current_dir}/${current}.idxstats" idxstats
+done
 
 
 ############## Create final table
@@ -164,7 +191,8 @@ ln -s ${COV_DIR}/${FINAL_TABLE}
 ############## Create lollipop plots
 mkdir -p $COV_DIR/PLOTS
 echo "-- Create lollipop plots for every target"
-    Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER}
+echo "Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER}"
+Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER}
 echo "-- .. done with plotting."
 rm $COV_DIR/cg*
 
@@ -172,6 +200,7 @@ rm $COV_DIR/cg*
 ############## Find methyl subpopulations
 echo "CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}"
 bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}
+
 
 
 ############## Copy the plots
@@ -196,7 +225,9 @@ cp ${COV_DIR}/MethylSubpopulations/Output/* subpopulations/
 
 
 ############## Create final JSON file
-python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc
+echo "Creating final JSON file"
+echo "${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats"
+python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats
 
 
 

@@ -173,7 +173,7 @@ def getInputCovFiles(dir_cov_file):
 def getNameFromCovFile(cov_file):
     cov_file_base = os.path.basename(cov_file)
     print "cov_file_base: " + str(cov_file_base)
-    m = re.search("PGM_\d+._IonXpress_(\d+)_1(_trimmed)+.fastq_bismark_\w+.bismark.cov", cov_file_base)
+    m = re.search("\w+_\d+._IonXpress_(\d+)_1(_trimmed)+.fastq_bismark_\w+.bismark.cov", cov_file_base)
 
     return m.group(1)
     #PGM_316D_IonXpress_032_1_trimmed_trimmed.fastq_bismark_tmap.bismark.cov

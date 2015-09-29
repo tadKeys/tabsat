@@ -163,7 +163,7 @@ ${QC_MODULE} ${outputfolder}/${FILENAME}_trimmed.fastq ${outputfolder}
 
 SAM_FILE="${outputfolder}/${FILENAME}_trimmed.fastq_bismark_tmap.sam"
 
-echo "-- Bismark $aligner for ${file} ..."
+echo "-- Bismark $aligner for ${outputfolder}/${FILENAME}_trimmed.fastq ..."
 
 if [[ ! -f ${SAM_FILE} ]]
 then
