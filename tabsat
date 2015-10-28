@@ -2,7 +2,8 @@
 
 USER_HOME=$HOME
 BASE_DIR="${USER_HOME}/tabsat"
-FINAL_TABLE="${BASE_DIR}/tools/ait/create_final_table.py"
+FINAL_TABLE_SCRIPT="${BASE_DIR}/tools/ait/create_final_table.py"
+FINAL_BED_SCRIPT="${BASE_DIR}/tools/ait/convert_final_table_to_bed.py"
 R_PLOTTING="${BASE_DIR}/tools/R/lollipop.R"
 METHYL_SUBPOP="${BASE_DIR}/tools/MethylSubpop/subpopulations.sh"
 BISMARK_RUN="${BASE_DIR}/02_meth_pipe.sh"
@@ -180,12 +181,19 @@ done
 
 ############## Create final table
 echo "-- Creating final table.."
-    python ${FINAL_TABLE} ${TARGET_LIST} ${COV_DIR} ${READ_CUTOFF}
+    python ${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${READ_CUTOFF}
 echo "-- .. done with table creation."
 
 ## Link the final table
 FINAL_TABLE="ResultMethylListOnlyReferenceCpGs.csv"
 ln -s ${COV_DIR}/${FINAL_TABLE}
+
+## Produce the BED file
+echo "-- Creating final bed.."
+FINAL_BED="ResultMethylListOnlyReferenceCpGs.bed"
+python ${FINAL_BED_SCRIPT} ${FINAL_TABLE} ${FINAL_BED}
+echo "-- .. done with bed creation."
+
 
 
 ############## Create lollipop plots
