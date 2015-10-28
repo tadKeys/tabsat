@@ -2,7 +2,7 @@
 
 TABSAT - Targeted Amplicon Bisulfite Sequencing Analysis Tool - is a tool for analyzing targeted bisulfite sequencing data generated on an Ion Torrent PGM / Illumina MiSeq. 
 It performs
-* QA
+* Quality Assessment
 * Alignment using [Bismark][http://www.bioinformatics.babraham.ac.uk/projects/bismark/]
 * Result aggregation into a table
 * Visualization as lollipop plots
