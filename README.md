@@ -25,6 +25,7 @@ ${TABSAT} -l NONDIR -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir 
 **-q** *[optional]* Bases that are below the given threshold are removed from the 3’ end of the reads (read trimming)<br />
 **-p** *[optional]* Percent of target covered by a read for pattern creation. This value specifies the percent of the target that needs to be covered by a read to include it for pattern analysis.<br />
 **-r**: *[optional]* Minimum number of mapped reads that need to be present at each CpG site.	<br />
+**-s**: *[optional]* Sorted list of samples that is used to specify the order in the lollipop plots.<br />
 **-o** Output directory<br />
 **-d** List of inputfiles; if not specified, the input files are added at the end [optional]<br />
 

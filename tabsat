@@ -10,7 +10,7 @@ BISMARK_RUN="${BASE_DIR}/02_meth_pipe.sh"
 JSON_CREATOR="${BASE_DIR}/tools/ait/prepare_json.py"
 
 usage () {
-    echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -m min_read_length -q min_read_qual -p percent_target_for_patterns -r min_number_reads_cpg -o outputdirectory [files] \n"
+    echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -m min_read_length -q min_read_qual -p percent_target_for_patterns -r min_number_reads_cpg -s sort_list -o outputdirectory [files] \n"
 }
 
 
@@ -28,6 +28,7 @@ while getopts ":ht:l:d:o:a:m:q:p:r:" option; do
 		q) MIN_READ_QUAL=${OPTARG};;
 		p) PERCENT_TARGET=${OPTARG};;
 		r) READ_CUTOFF=${OPTARG};;
+		s) SORT_LIST=${OPTARG};;
 		?) echo "Error: unknown option -$OPTARG" 
 			usage
 			exit 1;;
@@ -81,6 +82,12 @@ echo "PERCENT_TARGET: ${PERCENT_TARGET}"
 if [ -z "$READ_CUTOFF" ]; then
   echo "Read cutoff not specified. Setting it to 0"
   READ_CUTOFF="0"
+fi
+echo "READ_CUTOFF: ${READ_CUTOFF}"
+
+if [ -z "$SORT_LIST" ]; then
+  echo "Sort list not specified. Setting it to ''"
+  SORT_LIST=""
 fi
 echo "READ_CUTOFF: ${READ_CUTOFF}"
 
@@ -200,7 +207,7 @@ echo "-- .. done with bed creation."
 mkdir -p $COV_DIR/PLOTS
 echo "-- Create lollipop plots for every target"
 echo "Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER}"
-Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER}
+Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER} ${SORT_LIST}
 echo "-- .. done with plotting."
 rm $COV_DIR/cg*
 
@@ -235,7 +242,7 @@ cp ${COV_DIR}/MethylSubpopulations/Output/* subpopulations/
 ############## Create final JSON file
 echo "Creating final JSON file"
 echo "${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats"
-python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats
+python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats ${FINAL_BED}
 
 
 
