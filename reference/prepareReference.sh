@@ -1,7 +1,7 @@
 #/bin/bash
 
-BASE="/home/xworx/bismark_karina/"
-TOOLS="${BASE}/tools"
+USER_HOME=$HOME
+TOOLS="${USER_HOME}/tabsat/tools"
 
 SCRIPT="${TOOLS}/bismark_tmap/bismark_genome_preparation"
 REFPATH="${BASE}/reference/human/hg19/bismark_tmap"
