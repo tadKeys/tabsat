@@ -53,6 +53,7 @@ $ tabsat/reference/prepareReference.sh
 * Prepare the CpG file
 ```sh
 apt-get install p7zip-full
+7za e tabsat/tools/ait/all_cpgs_only_pos.7z
 ```
 
 
