@@ -3,6 +3,9 @@
 #
 # Helper script to call tmap index
 #
+USER_HOME=$HOME
+BASE_DIR="${USER_HOME}/tabsat"
+TOOLS="${BASE_DIR}/tools"
 
-./tmap index "$@"
+${TOOLS}/iontorrent/tmap index "$@"
 
