@@ -61,7 +61,7 @@ def main():
         sys.exit()
 
     idx_dir = sys.argv[1]
-    output_file = sys.argv[1]
+    output_file = sys.argv[2]
 
     combine_stats(idx_dir, output_file)
 
