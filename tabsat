@@ -4,6 +4,7 @@ USER_HOME=$HOME
 BASE_DIR="${USER_HOME}/tabsat"
 FINAL_TABLE_SCRIPT="${BASE_DIR}/tools/ait/create_final_table.py"
 FINAL_BED_SCRIPT="${BASE_DIR}/tools/ait/convert_final_table_to_bed.py"
+FINAL_COMBINE_IDXSTATS_SCRIPT="${BASE_DIR}/tools/ait/combine_idx_stats.py"
 R_PLOTTING="${BASE_DIR}/tools/ait/lollipop.R"
 METHYL_SUBPOP="${BASE_DIR}/tools/MethylSubpop/subpopulations.sh"
 BISMARK_RUN="${BASE_DIR}/02_meth_pipe.sh"
@@ -182,8 +183,15 @@ do
     samtools index ${current_bam}.sorted.bam
 
     samtools idxstats "${current_bam}.sorted.bam" > "${current_dir}/${current}.idxstats"
-    cp "${current_dir}/${current}.idxstats" idxstats
+    cp "${current_dir}/${current}.idxstats" "idxstats"
 done
+
+############## Combine idxstats
+echo "-- Combinind idxstats"
+    python ${FINAL_COMBINE_IDXSTATS_SCRIPT} "idxstats" "idxstats/coverage_summary.csv"
+echo "-- .. done with combining idxstats"
+
+
 
 
 ############## Create final table
