@@ -188,7 +188,8 @@ done
 
 ############## Combine idxstats
 echo "-- Combinind idxstats"
-    python ${FINAL_COMBINE_IDXSTATS_SCRIPT} "idxstats" "idxstats/coverage_summary.csv"
+    IDX_DIR="${OUTPUT_DIR}/idxstats"
+    python ${FINAL_COMBINE_IDXSTATS_SCRIPT} ${IDX_DIR} "${IDX_DIR}/coverage_summary.csv"
 echo "-- .. done with combining idxstats"
 
 
