@@ -3,7 +3,7 @@
 TABSAT - Targeted Amplicon Bisulfite Sequencing Analysis Tool - is a tool for analyzing targeted bisulfite sequencing data generated on an Ion Torrent PGM / Illumina MiSeq. 
 It performs
 * Quality Assessment
-* Alignment using [Bismark][http://www.bioinformatics.babraham.ac.uk/projects/bismark/]
+* Alignment using [Bismark](http://www.bioinformatics.babraham.ac.uk/projects/bismark/)
 * Result aggregation into a table
 * Visualization as lollipop plots
 
@@ -18,7 +18,7 @@ Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 ```sh
 ${TABSAT} -l NONDIR -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir input.fastq
 ```
-**-t** Targetlist in CSV format [TODO example] [mandatory]<br />
+**-t** Targetlist in CSV format [example](https://github.com/tadKeys/tabsat/blob/master/tools/zz_test/target_list.csv) [mandatory]<br />
 **-l** Library mode of bisulfite experiment<br />
 **-a** *[optional]* Specify the aligner that should be used<br />
 **-m** *[optional]* This parameter is used for filtering reads that are shorter than the given threshold.<br />
@@ -55,5 +55,23 @@ $ tabsat/reference/prepareReference.sh
 apt-get install p7zip-full
 7za e tabsat/tools/ait/all_cpgs_only_pos.7z
 ```
+
+
+## Run example
+
+#### Command line
+* After installation go to *tabsat/tools/zz_test*
+* Execute
+```sh
+./test_tabsat.sh
+```
+* Inspect output at *tabsat/tabsat_test_output*
+
+#### Platomics
+[TODO]
+
+
+
+
 
 
