@@ -126,13 +126,17 @@ else
 fi
 
 
-## Create output dir
+## Create base output dir
 mkdir -p $OUTPUT_DIR
 
-
+## Create output directories
 COV_DIR="$OUTPUT_DIR"/COVERAGE_"$BS_SEQ"_"$ALIGNER"
-echo "Used coverage directory: $COV_DIR"
+echo "Creating and setting coverage directory: $COV_DIR"
 mkdir -p $COV_DIR
+
+CPG_DIR="$OUTPUT_DIR"/CPG_"$BS_SEQ"_"$ALIGNER"
+echo "Creating and setting CpG directory: $CPG_DIR"
+mkdir -p $CPG_DIR
 
 
 ############# Create directory for methyl subpopulations
@@ -163,8 +167,13 @@ do
     echo "current_dir: ${current_dir}"
     echo -e "\nRunning Bismark... \n"
     bash ${BISMARK_RUN} ${file} ${current_dir} $TARGET_LIST $BS_SEQ $ALIGNER $MIN_READ_LEN $MIN_READ_QUAL
-    echo -e "Copying files \n"
+
+    echo -e "Copying coverage files \n"
     echo "cp ${current_dir}/*.cov $COV_DIR"
+
+    echo -e "Copying CpG files with strand information \n"
+    echo "cp ${current_dir}/CpG_*txt $CPG_DIR"
+
     /bin/bash -c "cp ${current_dir}/*.cov ${COV_DIR}/"
     /bin/bash -c "cp ${current_dir}/*.sam ${POP_DIR}/"
     /bin/bash -c "cp ${current_dir}/*html qc"

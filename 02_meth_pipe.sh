@@ -187,14 +187,6 @@ ${SCRIPT_METH_EXT} -s --bedGraph ${SAM_FILE} -o ${outputfolder} &> "${outputfold
 echo "-- ... done with methyl extraction."
 
 
-##
-## Create final table
-##
-#echo "-- Creating final table.."
-
-#python ${FINAL_TABLE} ${target_list} ${outputfolder}
-
-#echo "-- .. done with table creation."
 
 
 
