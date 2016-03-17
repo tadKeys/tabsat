@@ -8,7 +8,7 @@ It performs
 * Visualization as lollipop plots
 
 Available as
-* Fully configured Virtual Machine [TODO]
+* Fully configured Docker image [Dockerfile](Dockerfile) - see usage information below.
 * [Platomics](www.platomics.com) app [TODO]
 * Source code
 
@@ -70,7 +70,24 @@ apt-get install p7zip-full
 #### Platomics
 [TODO]
 
+#### Docker
+* Build the docker file<br/>
+```docker build -t tabsat:v1 . ```
 
+* Run it<br/> 
+```docker run -t --name tabsat -d tabsat:v1 ```
+
+* Connect to docker<br/>
+```docker exec -ti tabsat /bin/bash ```
+
+* Stop container<br/>
+```docker stop tabsat```
+
+* Remove container<br/>
+```docker rm tabsat```
+
+* Remove image<br/>
+```docker rmi tabsat:v1```
 
 
 
