@@ -29,7 +29,7 @@ setwd(directory)
 ################################## Method for the creation of a lollipop plot #########################################
 plotting <- function(x){
     plottype <- x
-    if (plottype == "adapted") dataset$Pos <- as.factor(dataset$Pos)
+    if (plottype == "adapted") dataset$pos <- as.factor(dataset$pos)
 
     ## DEBUG
     # print(Name)
@@ -115,7 +115,7 @@ plotting <- function(x){
 
 
     pdf(file = paste("PLOTS/",library_dir,"_",aligner,"_",plottype,"___",Name,".pdf",sep=""), width=pixelw, height = pixelh)
-    p <-  ggplot(dataset, aes(x=Pos, y=variable, color=cut(value, breaks=c(-0.01,10,20,30,40,50,60,70,80,90,100)), shape=ifelse(is.na(value), "Missing", "Present")))
+    p <-  ggplot(dataset, aes(x=pos, y=variable, color=cut(value, breaks=c(-0.01,10,20,30,40,50,60,70,80,90,100)), shape=ifelse(is.na(value), "Missing", "Present")))
     p <- p + geom_point(size=4)
     p <- p + scale_shape_manual(name="", values=c(Missing=4, Present=19))
     if (plottype == "proportional") {
@@ -138,7 +138,7 @@ plotting <- function(x){
 ################################### Read in & splitting the data######################################################
 warnings()
 data <- read.csv("ResultMethylList.csv")
-data <- subset(data, select=(names(data)[grep('^Name|^chr|^Pos|^Reads...ME', names(data))]))
+data <- subset(data, select=(names(data)[grep('^Name|^chr|^pos|^Reads...ME', names(data))]))
 dfs <- split(data, f=data[, "Name"])
 lapply(dfs, function(x) write.csv(x,row.names= FALSE, quote = FALSE,na = "NA", file=paste0(x[1,1], ".csv")))
 
@@ -154,7 +154,7 @@ for (file in files) {
     #print(dataset)
     #dataset <-read.table("cg04856858.csv",  sep=",",na.strings="-", header=TRUE)
 
-    target <- max(dataset$Pos) - min(dataset$Pos)
+    target <- max(dataset$pos) - min(dataset$pos)
     pixelw <-target*8.32/72 # target * 33
     pixelh <- pixelw * 0.32
     chrom <- unique(dataset$chr)
@@ -162,7 +162,7 @@ for (file in files) {
 
     ## Subset the dataset
     dataset <- subset(dataset, select=c(-Name, -chr))
-    dataset <- melt(dataset, id.vars="Pos")
+    dataset <- melt(dataset, id.vars="pos")
     
     ## Substitute "." with "_"
     dataset$variable <- gsub("\\.\\.\\.","_",dataset$variable)
@@ -170,7 +170,7 @@ for (file in files) {
     ## Remove "Reads_ME_" prefix
     dataset$variable <- gsub("Reads_ME_","",dataset$variable)
     
-    xaxes <- unique(dataset$Pos)
+    xaxes <- unique(dataset$pos)
     plotting("adapted")
     plotting("proportional")
 }

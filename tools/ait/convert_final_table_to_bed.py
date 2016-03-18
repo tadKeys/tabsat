@@ -23,7 +23,7 @@ with open(final_table) as ft, open(final_bed, "w") as fb:
 	    ## Store sample information in dict
 	    count = 0
 	    for column in row:
-		if count > 4 and (count + 2) % 3 == 0:
+		if count > 5 and (count + 1) % 3 == 0:
 		    sample_pos_dict[count] = column.split()[2]
 		count += 1
 
@@ -33,8 +33,8 @@ with open(final_table) as ft, open(final_bed, "w") as fb:
 
 	output_row = []
 	output_row.append(row[1])
-	output_row.append(str(int(row[4])-1))
-	output_row.append(str(int(row[4])))
+	output_row.append(str(int(row[5])-1))
+	output_row.append(str(int(row[5])))
 
 	## Get all samples with a valid % methylation for that position
 	samples_with_value_at_pos = list()
