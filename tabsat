@@ -256,6 +256,9 @@ mkdir subpopulations
 cp ${COV_DIR}/MethylSubpopulations/Output/* subpopulations/
 
 
+############## Change permissions for qc directory
+chmod a+r -R qc
+
 
 ############## Create final JSON file
 echo "Creating final JSON file"
