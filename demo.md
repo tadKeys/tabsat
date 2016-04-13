@@ -4,9 +4,9 @@
 http://x.platomics.com
 
 ### Credentials
-* Log-in with
-user:
-password:
+Log-in with</br>
+**user**:</br>
+**password**:</br>
 
 ### Steps
 * Download the demo data:
