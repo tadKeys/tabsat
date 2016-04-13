@@ -10,8 +10,8 @@ password:
 
 ### Steps
 * Download the demo data:
-- [Dockerfile](Target file)
-- [](FASTQ file)
+- [Target file](tools/zz_test/target_list.csv)
+- [FASTQ file](tools/zz_test/PGM_316D_IonXpress_028_1.fastq)
 * Select the project in the top left corner - the input page of the TABSAT software is loaded
 * Use the previously downloaded files as input files
 * Run the software
