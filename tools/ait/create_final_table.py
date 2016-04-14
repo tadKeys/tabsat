@@ -11,6 +11,7 @@ import datetime
 import time
 import subprocess
 from subprocess import CalledProcessError
+from collections import defaultdict
 
 
 ## Default cutoffs
@@ -357,7 +358,7 @@ def getNameFromCovFile(cov_file):
 ## Calculates average per gene/sample -> clips everything below (mean - stddev)
 ##
 def filterLowCovCalls(result_file, filtered_file, cov_sum_cutoff, cov_pos_cutoff):
-    sample_cov = dict()
+    sample_cov = defaultdict(list)
     oligo_pos = dict()  # number of positions per oligo
 
     index_to_start = 6
@@ -395,10 +396,8 @@ def filterLowCovCalls(result_file, filtered_file, cov_sum_cutoff, cov_pos_cutoff
                 ## Skip percentage
                 i += 1
 
-                ## Add to array
+                ## Build key
                 key = oligo + "_" + str(sample_index)
-                if (not key in sample_cov):
-                    sample_cov[key] = list()
 
                 ## Build average
                 if me_r != "-" and um_r != "-":
@@ -417,12 +416,6 @@ def filterLowCovCalls(result_file, filtered_file, cov_sum_cutoff, cov_pos_cutoff
                     if sum_cov > cov_sum_cutoff or (int(me_r) > cov_pos_cutoff and int(um_r) > cov_pos_cutoff):
                         sample_cov[key].append(avg_at_pos)
 
-                        # if me_r != "-":
-                    #    sample_cov[key].append(int(me_r))
-                    # if um_r != "-":
-                    #    sample_cov[key].append(int(um_r))
-
-
                     # print i
                     # print me_r
                     # print um_r
@@ -430,94 +423,103 @@ def filterLowCovCalls(result_file, filtered_file, cov_sum_cutoff, cov_pos_cutoff
                 i += 1
                 sample_index += 1
 
-    with open(result_file, 'r') as r:
+
+    ## Apply average filter
+    with open(result_file, 'r') as r, open(filtered_file, 'w') as w:
         csvreader = csv.reader(r, delimiter=",")
-        with open(filtered_file, 'w') as w:
-            writer = csv.writer(w)
+        writer = csv.writer(w)
 
-            header_printed = 0
+        header_printed = 0
 
-            for m_line in csvreader:
-                if not header_printed:
-                    header_printed = 1
-                    writer.writerow(m_line)
-                    continue
+        for m_line in csvreader:
+            if not header_printed:
+                header_printed = 1
+                writer.writerow(m_line)
+                continue
 
-                oligo = m_line[0]
-                sample_index = 0
+            oligo = m_line[0]
+            sample_index = 0
 
-                ## Index where to start
-                i = index_to_start
-                me_index = 0
-                um_index = 0
-                perc_index = 0
-                while (i < len(m_line)):
-                    ## Methylated reads
-                    me_index = i
-                    me_r = m_line[i] if m_line[i] != "-" else 0
+            ## Index where to start
+            i = index_to_start
+            while (i < len(m_line)):
+                ## Methylated reads
+                me_index = i
+                me_r = m_line[i] if m_line[i] != "-" else 0
 
-                    ## Unmethylated reads
-                    i += 1
-                    um_index = i
-                    um_r = m_line[i] if m_line[i] != "-" else 0
+                ## Unmethylated reads
+                i += 1
+                um_index = i
+                um_r = m_line[i] if m_line[i] != "-" else 0
 
-                    ## Skip percentage
-                    i += 1
-                    perc_index = i
+                ## Skip percentage
+                i += 1
+                perc_index = i
 
-                    ##
-                    ## Check if reads have sufficient coverage
-                    ##
-                    sum_cov = float(me_r) + float(um_r)
-                    key = oligo + "_" + str(sample_index)
+                ##
+                ## Check if reads have sufficient coverage
+                ##
+                sum_cov = float(me_r) + float(um_r)
+                key = oligo + "_" + str(sample_index)
 
-                    ## Don't trust calls where max 2 reads where used
-                    if sum_cov <= cov_sum_cutoff and (int(me_r) <= cov_pos_cutoff or int(um_r) <= cov_pos_cutoff):
-                        m_line[me_index] = "-"
-                        m_line[um_index] = "-"
-                        m_line[perc_index] = "-"
-                        i += 1
-                        sample_index += 1
-                        continue
+                ## Don't trust calls where 'cutoff value' reads where used
+                if sum_cov <= cov_sum_cutoff and (int(me_r) <= cov_pos_cutoff or int(um_r) <= cov_pos_cutoff):
 
-                        # print "\nNew position"
-                    ## Average cov for sample at oligo
-                    sum_up_cov = 0
-                    for val in sample_cov[key]:
-                        #			print val
-                        sum_up_cov += int(val)
+                    #print "Sample " + key + " does not have enough coverage for hard cutoff or me/um cutoff:"
+                    #print "sum_cov: " + str(sum_cov) + "/" + str(cov_sum_cutoff)
+                    #print "ME: " + str(int(me_r)) + "/" + str(cov_pos_cutoff)
+                    #print "UM: " + str(int(um_r)) + "/" + str(cov_pos_cutoff)
 
-                    ## Sum of meth & unmeth calls for position
-                    sam_oligo_avg_cov = float(float(sum_up_cov) / float(oligo_pos[oligo]))
-
-                    # print "key: " + str(key)
-                    # print "sample_cov[key]: " + str(sample_cov[key])
-                    # print "sam_oligo_avg_cov: " + str(sam_oligo_avg_cov)
-                    # print "mean: " + str(numpy.mean(sample_cov[key]))		# calculate the average only from values that are there (don't use "-")
-                    # print "median: " + str(numpy.median(sample_cov[key]))
-                    # print "std: " + str(numpy.std(sample_cov[key]))
-                    # print "perc: " + str(numpy.percentile(sample_cov[key], 20))
-
-
-                    # print numpy.percentile(sample_cov[key], 10)
-
-                    cutoff_cov = 0
-                    if sample_cov[key]:  # Check if values are present
-                        # cutoff_cov = numpy.percentile(sample_cov[key], 20)				# Percentile cutoff
-                        cutoff_cov = numpy.mean(sample_cov[key]) - numpy.std(sample_cov[key])  # Mean-std cutoff
-
-                        # print "cutoff_cov: " + str(cutoff_cov)
-
-                    ## Filter low cov positions
-                    if sum_cov < cutoff_cov:
-                        m_line[me_index] = "-"
-                        m_line[um_index] = "-"
-                        m_line[perc_index] = "-"
-
+                    m_line[me_index] = "-"
+                    m_line[um_index] = "-"
+                    m_line[perc_index] = "-"
                     i += 1
                     sample_index += 1
+                    continue
 
-                writer.writerow(m_line)
+
+
+
+                ## DEBUG
+                #print "key: " + str(key)
+                #print "sample_cov[key]: " + str(sample_cov[key])
+                # print "mean: " + str(numpy.mean(sample_cov[key]))		# calculate the average only from values that are there (don't use "-")
+                # print "median: " + str(numpy.median(sample_cov[key]))
+                # print "std: " + str(numpy.std(sample_cov[key]))
+                # print "perc: " + str(numpy.percentile(sample_cov[key], 20))
+                # print numpy.percentile(sample_cov[key], 10)
+
+
+                ## Calculate the cutoff value
+                cutoff_cov = 0
+                if sample_cov[key]:  # Check if values are present
+                    # cutoff_cov = numpy.percentile(sample_cov[key], 20)				# Percentile cutoff
+                    cutoff_cov = numpy.mean(sample_cov[key]) - numpy.std(sample_cov[key])  # Mean-std cutoff
+
+
+
+                #print "cutoff_cov: " + str(cutoff_cov)
+                #print "sum_cov: " + str(sum_cov)
+
+                ## Filter low cov positions
+                if sum_cov < cutoff_cov:
+
+                    #print "\nRemoving sample because of cutoff cov"
+                    #print "key: " + str(key)
+                    #print "sample_index: " + str(sample_index)
+                    #print "i: " + str(i)
+                    #print "sample_cov[key]: " + str(sample_cov[key])
+                    #print "cutoff_cov: " + str(cutoff_cov)
+                    #print "sum_cov: " + str(sum_cov)
+
+                    m_line[me_index] = "-"
+                    m_line[um_index] = "-"
+                    m_line[perc_index] = "-"
+
+                i += 1
+                sample_index += 1
+
+            writer.writerow(m_line)
 
 
 def filterNotReferenceCpGs(result_file, filtered_file, all_cpg_file_path):
@@ -621,7 +623,6 @@ def main_method(target_list, cov_dir, usr_read_cutoff, all_cpg_file_path):
 
 
 if __name__ == '__main__':
-#def muh():
 
     ## Reading inputs
     target_list = sys.argv[1]
