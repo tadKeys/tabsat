@@ -5,8 +5,8 @@ http://x.platomics.com
 
 ### Credentials
 Log-in with</br>
-**user**:</br>
-**password**:</br>
+**user**: tabsat@platomics.com</br>
+**password**: demo456</br>
 
 ### Steps
 * Download the demo data:
