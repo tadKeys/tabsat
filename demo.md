@@ -1,7 +1,7 @@
 # TABSAT - demo - try the software
 
 ### URL
-http://x.platomics.com
+http://demo.platomics.com
 
 ### Credentials
 Log-in with</br>
