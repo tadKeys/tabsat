@@ -1,5 +1,6 @@
 #!/bin/bash
 
+TABSAT_VERSION="1.0.0"
 USER_HOME=$HOME
 BASE_DIR="${USER_HOME}/tabsat"
 FINAL_TABLE_SCRIPT="${BASE_DIR}/tools/ait/create_final_table.py"
@@ -14,11 +15,17 @@ usage () {
     echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -m min_read_length -q min_read_qual -p percent_target_for_patterns -r min_number_reads_cpg -s sort_list -o outputdirectory [files] \n"
 }
 
+version () {
+    echo -e "TABSAT ${TABSAT_VERSION}"
+}
+
 
 ############# Filtering of parameters
-while getopts ":ht:l:d:o:a:m:q:p:r:" option; do
+while getopts ":hvt:l:d:o:a:m:q:p:r:" option; do
 	case "$option" in
 		h) usage
+		   exit 0 ;;
+		v) version
 		   exit 0 ;;
 		t) TARGET_LIST=${OPTARG};;
 		l) BS_SEQ=${OPTARG};;
