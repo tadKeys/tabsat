@@ -10,8 +10,6 @@ PRINSEQGRAPHS="${TOOLS}/prinseq-lite-0.20.4/prinseq-graphs-noPCA.pl"
 SCRIPT_BOWTIE2="${TOOLS}/bismark_original/bismark" #only for bowtie2
 SCRIPT_TMAP="${TOOLS}/bismark_tmap/bismark"
 #SCRIPT_TMAP="${TOOLS}/bismark_tmap/bismark_indel" #when using GATK
-REFPATH_TMAP="${BASE_DIR}/reference/human/hg19/bismark_tmap"
-REFPATH_BOWTIE2="${BASE_DIR}/reference/human/hg19/bismark_bowtie2"
 
 SCRIPT_METH_BOWTIE2="${TOOLS}/bismark_original/bismark_methylation_extractor" #only for bowtie2
 SCRIPT_METH_TMAP="${TOOLS}/bismark_tmap/bismark_methylation_extractor"
@@ -46,19 +44,19 @@ fi
 
 if [ -n "$3" ];
 then
-target_list=${3}
+    target_list=${3}
 else
-echo "-- Please specify an list of targets in tab separated format."
+    echo "-- Please specify an list of targets in tab separated format."
 exit
 fi
 
 
 if [[ $4 ]];
 then
-seq_library=${4}
-echo "$seq_library"
+    seq_library=${4}
+    echo "$seq_library"
 else
-echo "-- Please specify the sequence library: NONDIR or DIR/ $seq_library"
+    echo "-- Please specify the sequence library: NONDIR or DIR/ $seq_library"
 exit
 fi
 
@@ -91,6 +89,27 @@ fi
 echo "param_min_qual: ${param_min_qual}"
 
 
+if [[ $8 ]];
+then
+    param_ref_genome=${8}
+else
+    echo "Assuming human reference is needed"
+    param_ref_genome="hg19"
+fi
+echo "param_ref_genome: ${param_ref_genome}"
+
+
+## Create paths for reference genome
+if [ $param_ref_genome == "hg19" ]
+then
+    REFPATH_TMAP="${BASE_DIR}/reference/human/hg19/bismark_tmap"
+    REFPATH_BOWTIE2="${BASE_DIR}/reference/human/hg19/bismark_bowtie2"
+elif [ $param_ref_genome == "mm10" ]
+    REFPATH_TMAP="${BASE_DIR}/reference/mouse/mm10/bismark_tmap"
+    REFPATH_BOWTIE2="${BASE_DIR}/reference/mouse/mm10/bismark_bowtie2"
+else
+    echo "-- Please specify a valid reference genome (hg19, mm10)."
+    exit
 
 
 
@@ -169,7 +188,6 @@ if [[ ! -f ${SAM_FILE} ]]
 then
   #echo "enable here"
   ${SCRIPT} ${aligner} ${seq_lib} -o ${outputfolder} ${REFPATH} ${outputfolder}/${FILENAME}_trimmed.fastq &> "${outputfolder}/bismark.log" #deleted tmap-options: -E 1 -g 3
-  #${SCRIPT_TMAP} --tmap -g 3 -E 1 -B test01 -o ${outputfolder} ${REFPATH_TMAP} ${outputfolder}/${FILENAME}_trimmed.fastq &> "${outputfolder}/bismark.log"
 else
   echo "-- SAM file exists"
 fi

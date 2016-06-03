@@ -58,7 +58,7 @@ RUN sh ./tabsat/reference/prepareReference.sh
 
 ## Prepare the CpG file
 ## 
-RUN 7za e -o tabsat/tools/ait/ tabsat/tools/ait/all_cpgs_only_pos.7z
+RUN 7za e -o tabsat/tools/ait/ tabsat/tools/ait/all_cpgs_only_pos_hg19.7z
 
 
 ## Configure the supervisor

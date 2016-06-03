@@ -27,7 +27,7 @@ def get_default_cutoffs():
 
 
 ## File containing all cpgs
-default_all_cgps_file_path = os.environ['HOME'] + "/tabsat/tools/ait/all_cpgs_only_pos.txt"
+default_all_cgps_file_path = os.environ['HOME'] + "/tabsat/tools/ait/all_cpgs_only_pos_hg19.txt"
 
 
 

@@ -20,6 +20,7 @@ ${TABSAT} -l NONDIR -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir 
 ```
 **-t** Targetlist in CSV format [example](https://github.com/tadKeys/tabsat/blob/master/tools/zz_test/target_list.csv) [mandatory] - Strand can be "+", "-", "+/-"<br />
 **-l** Library mode of bisulfite experiment<br />
+**-g** Genome (hg19, mm10)<br />
 **-a** *[optional]* Specify the aligner that should be used<br />
 **-m** *[optional]* This parameter is used for filtering reads that are shorter than the given threshold.<br />
 **-q** *[optional]* Bases that are below the given threshold are removed from the 3’ end of the reads (read trimming)<br />
@@ -43,9 +44,12 @@ tabsat -l NONDIR -t target.csv -o test_output_files xy.fastq abs.fastq
 ## Installation
 * Check out the project (git clone)
 * Download the reference genome 
- * Broad: ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.gz
- * ENSEMBL: ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
- * NCBI: ftp://ftp.ncbi.nlm.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37.p13/seqs_for_alignment_pipelines/GCA_000001405.14_GRCh37.p13_no_alt_analysis_set.fna.gz
+ * Human
+  * Broad: ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.gz
+  * ENSEMBL: ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
+  * NCBI: ftp://ftp.ncbi.nlm.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37.p13/seqs_for_alignment_pipelines/GCA_000001405.14_GRCh37.p13_no_alt_analysis_set.fna.gz
+ * Mouse
+  * USCS: http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.2bit
 * Prepare the reference genome
 ```sh
 $ tabsat/reference/prepareReference.sh
@@ -53,7 +57,7 @@ $ tabsat/reference/prepareReference.sh
 * Prepare the CpG file
 ```sh
 apt-get install p7zip-full
-7za e tabsat/tools/ait/all_cpgs_only_pos.7z
+7za e tabsat/tools/ait/all_cpgs_only_pos_hg19.7z
 ```
 
 

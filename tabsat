@@ -37,6 +37,7 @@ while getopts ":hvt:l:d:o:a:m:q:p:r:" option; do
 		p) PERCENT_TARGET=${OPTARG};;
 		r) READ_CUTOFF=${OPTARG};;
 		s) SORT_LIST=${OPTARG};;
+		g) REFERENCE_GENOME=${OPTARG};;
 		?) echo "Error: unknown option -$OPTARG" 
 			usage
 			exit 1;;
@@ -63,6 +64,13 @@ if [ -z "$TARGET_LIST" ]; then
   usage
   exit 1
 fi
+
+if [ -z "$REFERENCE_GENOME" ]; then
+  echo "Error: You need to specify a Reference genome (hg19, mm10) -g"
+  usage
+  exit 1
+fi
+
 
 if [ -z "$ALIGNER" ]; then
   echo "Default aligner for bismark: tmap"
@@ -173,7 +181,7 @@ do
     echo "Basename: ${current}"
     echo "current_dir: ${current_dir}"
     echo -e "\nRunning Bismark... \n"
-    bash ${BISMARK_RUN} ${file} ${current_dir} $TARGET_LIST $BS_SEQ $ALIGNER $MIN_READ_LEN $MIN_READ_QUAL
+    bash ${BISMARK_RUN} ${file} ${current_dir} ${TARGET_LIST} ${BS_SEQ} ${ALIGNER} ${MIN_READ_LEN} ${MIN_READ_QUAL} ${REFERENCE_GENOME}
 
     echo -e "Copying coverage files \n"
     echo "cp ${current_dir}/*.cov $COV_DIR"
