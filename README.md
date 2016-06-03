@@ -9,14 +9,14 @@ It performs
 
 Available as
 * Fully configured Docker image [Dockerfile](Dockerfile) - see usage information below.
-* [Platomics](www.platomics.com) app [TODO]
+* [Platomics](www.platomics.com) app - see [demo](demo.md)
 * Source code
 
 Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 
 ## Example usage
 ```sh
-${TABSAT} -l NONDIR -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir input.fastq
+${TABSAT} -l NONDIR -g hg19 -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir input.fastq
 ```
 **-t** Targetlist in CSV format [example](https://github.com/tadKeys/tabsat/blob/master/tools/zz_test/target_list.csv) [mandatory] - Strand can be "+", "-", "+/-"<br />
 **-l** Library mode of bisulfite experiment<br />
@@ -33,11 +33,11 @@ ${TABSAT} -l NONDIR -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir 
 #### Examples
 Test with input file directory
 ```sh
-tabsat -l NONDIR -t target.csv -d test_input_dir -a tmap -o test_output_dir
+tabsat -l NONDIR -g hg19 -t target.csv -d test_input_dir -a tmap -o test_output_dir
 ```
 Test with separate input files
 ```sh
-tabsat -l NONDIR -t target.csv -o test_output_files xy.fastq abs.fastq
+tabsat -l NONDIR -g hg19 -t target.csv -o test_output_files xy.fastq abs.fastq
 ```
 
 
@@ -72,7 +72,8 @@ apt-get install p7zip-full
 * Inspect output at *tabsat/tabsat_test_output*
 
 #### Platomics
-[TODO]
+Please see the instructions: [demo](demo.md)
+
 
 #### Docker
 * Build the docker file<br/>
