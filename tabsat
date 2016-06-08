@@ -12,7 +12,7 @@ BISMARK_RUN="${BASE_DIR}/02_meth_pipe.sh"
 JSON_CREATOR="${BASE_DIR}/tools/ait/prepare_json.py"
 
 usage () {
-    echo -e "\nUsage: $0 -t targetlist -l <DIR|NONDIR> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -m min_read_length -q min_read_qual -p percent_target_for_patterns -r min_number_reads_cpg -s sort_list -o outputdirectory [files] \n"
+    echo -e "\nUsage: $0 -t targetlist -e <SE|PE> -l <DIR|NONDIR> -g <hg19|mm10> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -m min_read_length -q min_read_qual -p percent_target_for_patterns -r min_number_reads_cpg -s sort_list -o outputdirectory [files] \n"
 }
 
 version () {
@@ -21,13 +21,14 @@ version () {
 
 
 ############# Filtering of parameters
-while getopts ":hvt:l:d:o:a:m:q:p:r:" option; do
+while getopts ":hvt:e:l:d:o:a:m:q:p:r:s:g:" option; do
 	case "$option" in
 		h) usage
 		   exit 0 ;;
 		v) version
 		   exit 0 ;;
 		t) TARGET_LIST=${OPTARG};;
+		e) LIBRARY=${OPTARG};;
 		l) BS_SEQ=${OPTARG};;
 		d) INPUTDIR=${OPTARG};;
 		o) OUTPUT_DIR=${OPTARG};;
@@ -46,87 +47,109 @@ done
 shift $(( OPTIND - 1 ))    
 
 echo -e "\n"
-echo -e "##########################"
-echo -e "##  Welcome to TABSAT!  ##"
-echo -e "##########################\n"
+echo -e "#################################"
+echo -e "##  Welcome to TABSAT!         ##"
+echo -e "##  github.com/tadKeys/tabsat  ##"
+echo -e "#################################\n"
 
 
 
 
 if [[ $BS_SEQ != "DIR" && $BS_SEQ != "NONDIR" ]]; then
-  echo "Error: You need to specify the BS-Seq library using <dir|nondir> for directional or nondirectional"
+  echo "- Error: You need to specify the BS-Seq library using <dir|nondir> for directional or nondirectional"
   usage
   exit 1
 fi
 
 if [ -z "$TARGET_LIST" ]; then
-  echo "Error: You need to specify a Target file using -t"
+  echo "- Error: You need to specify a Target file using -t"
   usage
   exit 1
 fi
 
+if [ -z "$LIBRARY" ]; then
+  echo "- Error: You need to specify a sequencing library file using -e (SE or PE)"
+  usage
+  exit 1
+fi
+
+if [ ${LIBRARY} == "SE" ] || [ ${LIBRARY} == "PE" ]; then
+    echo "- Library is ${LIBRARY}"
+else
+    echo "- Please specify a correct sequencing library (SE,PE)"
+    exit 1
+fi
+
+
 if [ -z "$REFERENCE_GENOME" ]; then
-  echo "Error: You need to specify a Reference genome (hg19, mm10) -g"
+  echo "- Error: You need to specify a Reference genome (hg19, mm10) -g"
   usage
   exit 1
 fi
 
 
 if [ -z "$ALIGNER" ]; then
-  echo "Default aligner for bismark: tmap"
+  echo "- Default aligner for bismark: tmap"
   ALIGNER="tmap"
 fi
 
+if [ ${ALIGNER} == "tmap" ] || [ ${ALIGNER} == "bowtie2" ]; then
+    echo "- Using aligner: ${ALIGNER}"
+else
+    echo "- Error: aligner not correct: ${ALIGNER}; choices: bowtie2,tmap"
+    usage
+    exit 1
+fi
+
+
+
 if [ -z "${MIN_READ_QUAL}" ]; then
-  echo "Minimum read qual not specified. Setting it to 20"
+  echo "- Minimum read qual not specified. Setting it to 20"
   MIN_READ_QUAL="20"
 fi
-echo "MIN_READ_QUAL: ${MIN_READ_QUAL}"
+echo "- MIN_READ_QUAL: ${MIN_READ_QUAL}"
 
 if [ -z "$MIN_READ_LEN" ]; then
-  echo "Minimum read length not specified. Setting it to 8"
+  echo "- Minimum read length not specified. Setting it to 8"
   MIN_READ_LEN="8"
 fi
-echo "MIN_READ_LEN: ${MIN_READ_LEN}"
+echo "- MIN_READ_LEN: ${MIN_READ_LEN}"
 
 if [ -z "$PERCENT_TARGET" ]; then
-  echo "Percent Target not specified. Setting it to 0.8"
+  echo "- Percent Target not specified. Setting it to 0.8"
   PERCENT_TARGET="0.8"
 fi
-echo "PERCENT_TARGET: ${PERCENT_TARGET}"
+echo "- PERCENT_TARGET: ${PERCENT_TARGET}"
 
 if [ -z "$READ_CUTOFF" ]; then
-  echo "Read cutoff not specified. Setting it to 0"
+  echo "- Read cutoff not specified. Setting it to 0"
   READ_CUTOFF="0"
 fi
-echo "READ_CUTOFF: ${READ_CUTOFF}"
+echo "- READ_CUTOFF: ${READ_CUTOFF}"
 
 if [ -z "$SORT_LIST" ]; then
-  echo "Sort list not specified. Setting it to ''"
+  echo "- Sort list not specified. Setting it to ''"
   SORT_LIST=""
 fi
-echo "READ_CUTOFF: ${READ_CUTOFF}"
+echo "- READ_CUTOFF: ${READ_CUTOFF}"
 
 
 if [[ -z "$INPUTDIR" && -z "$@" ]]; then
-  echo "Error: You have to specify either a directory name using -d or pass a list of files"
-  echo "Example: "
+  echo "- Error: You have to specify either a directory name using -d or pass a list of files"
   usage
   exit 1
 fi
 
 if [[ ! -d "$INPUTDIR" &&  -z "$@" ]]; then
-  echo "Error: the dir_name argument must be a directory or pass a list of files"
+  echo "- Error: the dir_name argument must be a directory or pass a list of files"
   exit 1
 fi
 
 if [ -z "$OUTPUT_DIR" ]; then
-  echo "Error: You need to specify an Output directory using -o"
+  echo "- Error: You need to specify an Output directory using -o"
   usage
   exit 1
 fi
-
-
 
 
 
@@ -146,11 +169,11 @@ mkdir -p $OUTPUT_DIR
 
 ## Create output directories
 COV_DIR="$OUTPUT_DIR"/COVERAGE_"$BS_SEQ"_"$ALIGNER"
-echo "Creating and setting coverage directory: $COV_DIR"
+echo "- Creating and setting coverage directory: $COV_DIR"
 mkdir -p $COV_DIR
 
 CPG_DIR="$OUTPUT_DIR"/CPG_"$BS_SEQ"_"$ALIGNER"
-echo "Creating and setting CpG directory: $CPG_DIR"
+echo "- Creating and setting CpG directory: $CPG_DIR"
 mkdir -p $CPG_DIR
 
 
@@ -170,31 +193,65 @@ mkdir qc
 ## Create idxstats dir
 mkdir idxstats
 
-echo -e "\n\n"
+echo -e "\n"
 
 base_pwd_dir=`pwd`
+
 
 for file in $FILEARRAY
 do
     current="$(basename "$file" .fastq)"
     current_dir="${base_pwd_dir}/${current}_${BS_SEQ}_${ALIGNER}"
-    echo "Basename: ${current}"
-    echo "current_dir: ${current_dir}"
-    echo -e "\nRunning Bismark... \n"
-    bash ${BISMARK_RUN} ${file} ${current_dir} ${TARGET_LIST} ${BS_SEQ} ${ALIGNER} ${MIN_READ_LEN} ${MIN_READ_QUAL} ${REFERENCE_GENOME}
+    echo "- Basename: ${current}"
+    echo "- current_dir: ${current_dir}"
+    echo -e "\n- Running Bismark... \n"
 
-    echo -e "Copying coverage files \n"
+    ## If PE get second file based on file name
+    if [ ${LIBRARY} == "PE" ]
+    then
+	## Check if current file ends with _2
+	if [ ${file: -8} == "_2.fastq" ]
+	then
+	    echo "- In list of files to process a 2nd PE file was found. Don't do anything; continue with loop"
+	    continue
+	fi
+	echo "- First file of PE ${current}"
+
+	current_wo_suffix="$(basename "$current" _1)"
+
+	for file_pe_loop in $FILEARRAY
+	do
+	    file_pe_loop_wo_suffix="$(basename "$file_pe_loop" _2.fastq)"
+	    if [ ${current_wo_suffix} == ${file_pe_loop_wo_suffix} ]
+	    then
+		file_pe=${file_pe_loop}
+		echo "- Found 2nd PE file ${file_pe}"
+		break
+	    fi
+	done
+    
+	bash ${BISMARK_RUN} ${file} ${current_dir} ${TARGET_LIST} ${BS_SEQ} ${ALIGNER} ${MIN_READ_LEN} ${MIN_READ_QUAL} ${REFERENCE_GENOME} ${LIBRARY} ${file_pe}
+    else
+        bash ${BISMARK_RUN} ${file} ${current_dir} ${TARGET_LIST} ${BS_SEQ} ${ALIGNER} ${MIN_READ_LEN} ${MIN_READ_QUAL} ${REFERENCE_GENOME} ${LIBRARY}
+    fi
+
+
+
+
+    echo -e "\nCopying coverage files"
     echo "cp ${current_dir}/*.cov $COV_DIR"
 
-    echo -e "Copying CpG files with strand information \n"
+    echo -e "\nCopying CpG files with strand information"
     echo "cp ${current_dir}/CpG_*txt $CPG_DIR"
+    echo ""
 
     /bin/bash -c "cp ${current_dir}/*.cov ${COV_DIR}/"
     /bin/bash -c "cp ${current_dir}/*.sam ${POP_DIR}/"
     /bin/bash -c "cp ${current_dir}/*html qc"
 
     ## Create samtools stats
-    current_sam="${current_dir}/${current}_trimmed.fastq_bismark_${ALIGNER}.sam"
+    current_sam=`ls ${current_dir}/*sam`
+
     current_bam="${current_dir}/${current}.bam"
 
     echo "samtools view -S -b ${current_sam} > ${current_bam}"
@@ -221,15 +278,15 @@ echo "-- .. done with combining idxstats"
 
 ############## Create final table
 echo "-- Creating final table.."
-    python ${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${READ_CUTOFF}
-echo "-- .. done with table creation."
+    python ${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${ALIGNER} ${READ_CUTOFF}
+echo "-- ... done with table creation."
 
 ## Link the final table
 FINAL_TABLE="ResultMethylListOnlyReferenceCpGs.csv"
 ln -s ${COV_DIR}/${FINAL_TABLE}
 
 ## Produce the BED file
-echo "-- Creating final bed.."
+echo "\n-- Creating final bed ..."
 FINAL_BED="ResultMethylListOnlyReferenceCpGs.bed"
 python ${FINAL_BED_SCRIPT} ${FINAL_TABLE} ${FINAL_BED}
 echo "-- .. done with bed creation."
@@ -238,15 +295,20 @@ echo "-- .. done with bed creation."
 
 ############## Create lollipop plots
 mkdir -p $COV_DIR/PLOTS
-echo "-- Create lollipop plots for every target"
-echo "Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER}"
+echo "\n-- Create lollipop plots for every target"
+echo "Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER} ${SORT_LIST}"
 Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER} ${SORT_LIST}
 echo "-- .. done with plotting."
-rm $COV_DIR/cg*
+
+## Remove csv tmp files
+for tmp_file_to_rm in `tail -n +2 MethylList.csv | cut -f 1 -d "," | sort | uniq`
+do
+    rm $COV_DIR/${tmp_file_to_rm}*
+done
 
 
 ############## Find methyl subpopulations
-echo "CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}"
+echo "\n- CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}"
 bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}
 
 

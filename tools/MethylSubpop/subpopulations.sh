@@ -32,7 +32,7 @@ mkdir -p $OUTDIR
 #evaluation of each .sam file: 1) whole targets 2)first & last methylated position in each target
 for file in $INDIR/*.sam
 		do
-			current="$(basename "$file" trimmed.fastq_bismark_tmap.sam)"			
+			current="$(basename "$file" trimmed.fastq_bismark.sam)"			
 			echo "Whole Target for $file"
 			perl $HOMEDIR/MethylPattern.pl $TARGET ${file} ${PERCENT_TARGET} > $OUTDIR/$current'WholeTarget.txt'
 			echo "Intermediate Positions for $file"

@@ -24,10 +24,8 @@ exit
 fi
 
 
+## Get the filename
 FILENAME=`basename ${file}`
-
-#echo $FILENAME
-#echo $outputfolder
 
 
 ##
@@ -36,9 +34,8 @@ FILENAME=`basename ${file}`
 mkdir -p $outputfolder
 
 
+
 echo "-- Performing QC with ${file} - folder: ${outputfolder} - filename: ${FILENAME}"
-
-
 
 ##
 ## Run PrinSeq

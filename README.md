@@ -19,6 +19,7 @@ Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 ${TABSAT} -l NONDIR -g hg19 -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir input.fastq
 ```
 **-t** Targetlist in CSV format [example](https://github.com/tadKeys/tabsat/blob/master/tools/zz_test/target_list.csv) [mandatory] - Strand can be "+", "-", "+/-"<br />
+**-e** Sequencing library - SE/PE<br/>
 **-l** Library mode of bisulfite experiment<br />
 **-g** Genome (hg19, mm10)<br />
 **-a** *[optional]* Specify the aligner that should be used<br />

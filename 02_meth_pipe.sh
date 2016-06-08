@@ -21,6 +21,8 @@ export PATH="${TOOLS}/iontorrent/:$PATH"
 export PATH="${TOOLS}/bowtie2/bowtie2-2.2.4/:$PATH"
 
 
+echo -e "\n- Starting 02_meth_pipe.sh\n"
+
 echo $@
 
 
@@ -29,15 +31,17 @@ then
     file=${1}
 else
     echo "-- Please specify a file"
+    exit 1
 exit
 fi
 
 
 if [ -n "$2" ];
 then
-outputfolder=${2}
+    outputfolder=${2}
 else
-echo "-- Please specify an output folder"
+    echo "-- Please specify an output folder"
+    exit 1
 exit
 fi
 
@@ -47,6 +51,7 @@ then
     target_list=${3}
 else
     echo "-- Please specify an list of targets in tab separated format."
+    exit 1
 exit
 fi
 
@@ -57,6 +62,7 @@ then
     echo "$seq_library"
 else
     echo "-- Please specify the sequence library: NONDIR or DIR/ $seq_library"
+    exit 1
 exit
 fi
 
@@ -67,6 +73,7 @@ then
     echo "$aligner"
 else
     echo "-- Please specify the aligner: bowtie2 or tmap"
+    exit 1
 exit
 fi 
 
@@ -77,7 +84,7 @@ then
 else
     param_min_length="8"
 fi
-echo "param_min_length: ${param_min_length}"
+echo "- param_min_length: ${param_min_length}"
 
 
 if [[ $7 ]];
@@ -86,17 +93,50 @@ then
 else
     param_min_qual="20"
 fi
-echo "param_min_qual: ${param_min_qual}"
+echo "- param_min_qual: ${param_min_qual}"
 
 
 if [[ $8 ]];
 then
     param_ref_genome=${8}
 else
-    echo "Assuming human reference is needed"
+    echo "- Assuming human reference is needed"
     param_ref_genome="hg19"
 fi
-echo "param_ref_genome: ${param_ref_genome}"
+echo "- param_ref_genome: ${param_ref_genome}"
+
+
+if [[ $9 ]];
+then
+    if [ $9 == "SE" ] || [ $9 == "PE" ]
+    then
+        param_seq_library=${9}
+    else
+	echo "- Please specify a correct sequencing library (SE,PE)"
+        exit 1
+    fi
+else
+    echo "- Please specify a sequencing library (SE,PE)"
+    exit 1
+fi
+echo "- param_seq_library: ${param_seq_library}"
+
+
+
+## If libary is PE than a second file needs to be provided
+if [ $param_seq_library == "PE" ]
+then
+    echo "- PE library - looking for second file"
+    if [[ $10 ]];
+    then
+	file_pe=${10}
+	echo "- Found 2nd PE file: ${file_pe}"
+    else
+	echo "- No second file for PE specified"
+	exit 1
+    fi
+fi
+
 
 
 ## Create paths for reference genome
@@ -105,22 +145,24 @@ then
     REFPATH_TMAP="${BASE_DIR}/reference/human/hg19/bismark_tmap"
     REFPATH_BOWTIE2="${BASE_DIR}/reference/human/hg19/bismark_bowtie2"
 elif [ $param_ref_genome == "mm10" ]
+then
     REFPATH_TMAP="${BASE_DIR}/reference/mouse/mm10/bismark_tmap"
     REFPATH_BOWTIE2="${BASE_DIR}/reference/mouse/mm10/bismark_bowtie2"
 else
     echo "-- Please specify a valid reference genome (hg19, mm10)."
-    exit
-
+    exit 1
+fi
 
 
 
 if [ $seq_library == "NONDIR" ]
 then
-seq_lib="--non_directional"
-echo "$seq_library"
-else 
-seq_lib=""
+    seq_lib="--non_directional"
+else
+    seq_lib=""
 fi
+
+echo "-- seq_library: $seq_library"
 
 if [ $aligner == "bowtie2" ]
 then
@@ -133,7 +175,7 @@ else
     REFPATH=${REFPATH_TMAP}
     SCRIPT=${SCRIPT_TMAP}
     SCRIPT_METH_EXT=${SCRIPT_METH_TMAP}
-fi 
+fi
 
 
 ##
@@ -153,8 +195,15 @@ mkdir -p $outputfolder
 ##
 ## Call QC module for the first time
 ##
-
 ${QC_MODULE} ${file} ${outputfolder}
+
+## Call for pair
+if [ $param_seq_library == "PE" ]
+then
+    ${QC_MODULE} ${file_pe} ${outputfolder}
+fi
+
+
 
 
 ##
@@ -163,33 +212,56 @@ ${QC_MODULE} ${file} ${outputfolder}
 
 echo "-- Performing Fastq filtering/trimming (filter min-length: ${param_min_length}bp, trim 3' end quality <${param_min_qual})"
 
-FILENAME=`basename ${file} .fastq`
-perl ${PRINSEQLITE} -fastq ${file} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len ${param_min_length} -trim_qual_right ${param_min_qual} -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming.log
+
+if [ $param_seq_library == "SE" ]
+then
+    echo "-- Filter for SE"
+    FILENAME=`basename ${file} .fastq`
+    perl ${PRINSEQLITE} -fastq ${file} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len ${param_min_length} -trim_qual_right ${param_min_qual} -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming.log
+else
+    echo "-- Filter for PE"
+    FILENAME=`basename ${file} _1.fastq`
+    echo "- FILENAME in PE setting: ${FILENAME}"
+    perl ${PRINSEQLITE} -fastq ${file} -fastq2 ${file_pe} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len ${param_min_length} -trim_qual_right ${param_min_qual} -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming_pe.log
+fi
 
 echo "-- ... done performing filtering/trimming"
+
 
 
 ##
 ## Call QC module again
 ##
 
-${QC_MODULE} ${outputfolder}/${FILENAME}_trimmed.fastq ${outputfolder}
+if [ $param_seq_library == "SE" ]
+then
+    ${QC_MODULE} ${outputfolder}/${FILENAME}_trimmed.fastq ${outputfolder}
+else
+    ## Call for paired-end
+    ${QC_MODULE} ${outputfolder}/${FILENAME}_trimmed_1.fastq ${outputfolder} &
+    ${QC_MODULE} ${outputfolder}/${FILENAME}_trimmed_2.fastq ${outputfolder} &
+    wait
+fi
 
 
 ##
 ## Bismark mapping
 ##
 
-SAM_FILE="${outputfolder}/${FILENAME}_trimmed.fastq_bismark_tmap.sam"
-
-echo "-- Bismark $aligner for ${outputfolder}/${FILENAME}_trimmed.fastq ..."
+SAM_FILE="${outputfolder}/${FILENAME}_trimmed.fastq_bismark.sam"
 
 if [[ ! -f ${SAM_FILE} ]]
 then
-  #echo "enable here"
-  ${SCRIPT} ${aligner} ${seq_lib} -o ${outputfolder} ${REFPATH} ${outputfolder}/${FILENAME}_trimmed.fastq &> "${outputfolder}/bismark.log" #deleted tmap-options: -E 1 -g 3
+    if [ $param_seq_library == "PE" ]
+    then
+	echo "-- Calling Bismark PE: ${outputfolder}/${FILENAME}_trimmed_1.fastq and ${outputfolder}/${FILENAME}_trimmed_2.fastq"
+	${SCRIPT} ${aligner} ${seq_lib} -o ${outputfolder} ${REFPATH} -1 ${outputfolder}/${FILENAME}_trimmed_1.fastq -2 ${outputfolder}/${FILENAME}_trimmed_2.fastq &> "${outputfolder}/bismark.log"
+    else
+	echo "-- Calling Bismark SE ${outputfolder}/${FILENAME}_trimmed.fastq"
+	${SCRIPT} ${aligner} ${seq_lib} -o ${outputfolder} ${REFPATH} ${outputfolder}/${FILENAME}_trimmed.fastq &> "${outputfolder}/bismark.log"
+    fi
 else
-  echo "-- SAM file exists"
+    echo "-- SAM file exists"
 fi
 
 echo "-- ... done with bismark."
@@ -200,7 +272,7 @@ SAM_FILE="${outputfolder}/${FILENAME}*.sam"
 ##
 ## Methyl extraction
 ##
-echo "-- Performing methyl extraction.."
+echo "-- Performing methyl extraction on SAM_FILE: ${SAM_FILE} ..."
 ${SCRIPT_METH_EXT} -s --bedGraph ${SAM_FILE} -o ${outputfolder} &> "${outputfolder}/extracter.log"
 echo "-- ... done with methyl extraction."
 

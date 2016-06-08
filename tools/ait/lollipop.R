@@ -144,8 +144,17 @@ lapply(dfs, function(x) write.csv(x,row.names= FALSE, quote = FALSE,na = "NA", f
 
 
 ################################### Create proportional & adapted plot for every target ##############################
-files <- list.files(path=getwd(), pattern="cg.*\\.csv", all.files=T, full.names=T)
+
+## Get names of files based on MethylList
+dml <- read.csv("MethylList.csv")
+dml.files <- as.character(unique(dml[,1]))
+
+files = paste0(getwd(), "/", dml.files, ".csv")
+
+## Old way
+#files_old <- list.files(path=getwd(), pattern="pos.*\\.csv", all.files=T, full.names=T)
 #fileConn<-file("targetlength.txt")
+
 for (file in files) {
     dataset <- read.table(file,  sep=",",na.strings="-", header=TRUE)
 

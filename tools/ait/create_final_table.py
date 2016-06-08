@@ -33,7 +33,7 @@ default_all_cgps_file_path = os.environ['HOME'] + "/tabsat/tools/ait/all_cpgs_on
 
 
 #
-# gets all results (.cov) files from Bismark
+# Gets all results (.cov) files from Bismark
 # 
 #
 #
@@ -65,7 +65,7 @@ def prepareInitalList(file_initial_list, cov_dir, all_cpg_file_path):
                 # print "m: %s, %s, %s " % (m_chr, m_start, m_end)
                 for cov_file in getInputCovFiles(cov_dir):      # get all Bismark result files
 
-                    print "\nReading in file: " + str(cov_file)
+                    #print "\nReading in file: " + str(cov_file)
 
                     ## Prefill the buffer to increase speed
                     if first_pass_of_prefill:
@@ -260,7 +260,7 @@ def processLine(m_chr, m_pos, cov_file):
 ## Reads the Result file that has been created so far (has been copied in previous step)
 ## Appends new results from cov_file to each row
 ##
-def createEntriesForSample(cov_dir, cov_file, read_cutoff):
+def createEntriesForSample(cov_dir, cov_file, read_cutoff, mapper):
     count = 0
     with open(cov_dir + "/ResultMethylList.csv", "w") as w:
         writer = csv.writer(w)
@@ -269,7 +269,7 @@ def createEntriesForSample(cov_dir, cov_file, read_cutoff):
             header_printed = 0
             for m_line in csvreader:
                 if (not header_printed):
-                    sampleName = getNameFromCovFile(cov_file)
+                    sampleName = getNameFromCovFile(cov_file, mapper)
                     m_line.append("Reads ME_" + sampleName)
                     m_line.append("Reads UM_" + sampleName)
                     m_line.append("Reads % ME_" + sampleName)
@@ -329,10 +329,10 @@ def removeLineWithoutReport(output_file, input_file):
 ##
 ## Creates entries for all cov files (adds them as columns)
 ##
-def createEntriesForAllCovFiles(cov_dir, read_cutoff):
+def createEntriesForAllCovFiles(cov_dir, read_cutoff, mapper):
     all_cov_files = getInputCovFiles(cov_dir)
     for cov_file in all_cov_files:
-        createEntriesForSample(cov_dir, cov_file, read_cutoff)
+        createEntriesForSample(cov_dir, cov_file, read_cutoff, mapper)
         shutil.copyfile(cov_dir + "/ResultMethylList.csv",
                         cov_dir + "/MethylList.csv")  # copy result file - to be new input file
 
@@ -341,12 +341,20 @@ def getInputCovFiles(cov_dir):
     return sorted(glob.glob(cov_dir + "/*.cov"))
 
 
-def getNameFromCovFile(cov_file):
+def getNameFromCovFile(cov_file, mapper):
     cur_cov_file_basename = os.path.basename(cov_file)
     print "cur_cov_file_basename: " + str(cur_cov_file_basename)
-    m = re.search("\w+_\d+._IonXpress_(\d+)_1(_trimmed)+.fastq_bismark_\w+.bismark.cov", cur_cov_file_basename)
 
-    return m.group(1)
+    if mapper == "tmap":
+        m = re.search("\w+_\d+._IonXpress_(\d+)_1(_trimmed)+.fastq_bismark_\w+.bismark.cov", cur_cov_file_basename)
+        cov_file_name = m.group(1)
+    else:
+        cov_file_name = cur_cov_file_basename.split("_trimmed")[0]
+
+    print "cov_file name: " + str(cov_file_name)
+    return cov_file_name
+
+
 
 
 # PGM_316D_IonXpress_032_1_trimmed_trimmed.fastq_bismark_tmap.bismark.cov
@@ -558,7 +566,7 @@ def filterNotReferenceCpGs(result_file, filtered_file, all_cpg_file_path):
 ##
 ## MAIN MAIN MAIN
 ##
-def main_method(target_list, cov_dir, usr_read_cutoff, all_cpg_file_path):
+def main_method(target_list, cov_dir, usr_read_cutoff, all_cpg_file_path, mapper):
     print "***** Generating final output table *****"
 
     ## Default cutoffs
@@ -590,7 +598,7 @@ def main_method(target_list, cov_dir, usr_read_cutoff, all_cpg_file_path):
     print str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
 
     print "- creating entries"
-    createEntriesForAllCovFiles(cov_dir, read_cutoff)
+    createEntriesForAllCovFiles(cov_dir, read_cutoff, mapper)
 
     # Now remove entries where nothing has been reported (line consists only of "-")
     print "- cleaning result file"
@@ -627,19 +635,21 @@ if __name__ == '__main__':
     ## Reading inputs
     target_list = sys.argv[1]
     cov_dir = sys.argv[2]
+    mapper = sys.argv[3]
 
     print "- target_list: " + str(target_list)
     print "- cov_dir: " + str(cov_dir)
+    print "- mapper: " + str(mapper)
 
 
     usr_read_cutoff = None
     ## Reading hard cutoff value
-    if len(sys.argv) > 3:
-        usr_read_cutoff = int(sys.argv[3])
+    if len(sys.argv) > 4:
+        usr_read_cutoff = int(sys.argv[4])
         print "- using the read cutoff specified by the user: " + str(usr_read_cutoff)
 
 
-    main_method(target_list, cov_dir, usr_read_cutoff, default_all_cgps_file_path)
+    main_method(target_list, cov_dir, usr_read_cutoff, default_all_cgps_file_path, mapper)
 
 
 
