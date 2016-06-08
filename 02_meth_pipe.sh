@@ -113,7 +113,7 @@ then
         param_seq_library=${9}
     else
 	echo "- Please specify a correct sequencing library (SE,PE)"
-        exit 1
+	exit 1
     fi
 else
     echo "- Please specify a sequencing library (SE,PE)"
