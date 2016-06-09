@@ -54,7 +54,7 @@ class TabsatOutput:
         self.chr = row["chr"]
         self.start = row["start"]
         self.end = row["end"]
-        self.pos = row["pos"]
+        self.pos = row["Pos"]
         self.zip_file = insert_spacer_file_path(zip_file_path, None)
 
         ## To each sample properties are stored
@@ -81,7 +81,7 @@ class TabsatOutput:
         json_dict["Chr"] = self.chr
         json_dict["Start"] = self.start
         json_dict["End"] = self.end
-        json_dict["pos"] = self.pos
+        json_dict["Pos"] = self.pos
         json_dict["Zip"] = self.zip_file
 
         ## Create list of samples
@@ -152,7 +152,7 @@ def encode_pdf_base64(file_path):
     return None
 
 
-def create_zip_of_output(plot_directory, subpopulation_directory, qc_directory, final_table, final_bed):
+def create_zip_of_output(plot_directory, subpopulation_directory, cph_directory, qc_directory, final_table, final_bed):
 
     ## All plots
     plots = glob.glob(os.path.join(plot_directory, "*.pdf"))
@@ -162,6 +162,8 @@ def create_zip_of_output(plot_directory, subpopulation_directory, qc_directory, 
     sample_comp_subpops = glob.glob(os.path.join(subpopulation_directory, "*SampleComparision*"))
     ## QC files
     qc_files = glob.glob(os.path.join(qc_directory, "*html"))
+    ## CPH files
+    cph_files = glob.glob(os.path.join(cph_directory, "*txt"))
 
     zip_file_path = "final.zip"
 
@@ -177,6 +179,9 @@ def create_zip_of_output(plot_directory, subpopulation_directory, qc_directory, 
 
         for qc_file in qc_files:
             my_zip.write(qc_file)
+
+        for cph_file in cph_files:
+            my_zip.write(cph_file)
 
         my_zip.write(final_table)
         my_zip.write(final_bed)
@@ -294,10 +299,16 @@ def main():
         print "Idxstats directory does not exist: " + str(final_table)
         sys.exit()
 
-    final_bed = sys.argv[6]
+
+    cph_directory = sys.argv[6]
+    if not os.path.exists(cph_directory):
+        print "cph directory directory does not exist: " + str(final_table)
+        sys.exit()
+
+    final_bed = sys.argv[7]
 
     ## Create the ZIP file
-    zip_file_path = create_zip_of_output(plot_directory, subpopulation_directory, qc_directory, final_table, final_bed)
+    zip_file_path = create_zip_of_output(plot_directory, subpopulation_directory, cph_directory, qc_directory, final_table, final_bed)
 
     ## Call the script
     do(final_table, plot_directory, subpopulation_directory, qc_directory, idx_directory, zip_file_path)

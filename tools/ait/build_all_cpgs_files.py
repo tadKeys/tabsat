@@ -3,6 +3,7 @@
 import csv
 import os
 import subprocess
+import sys
 
 
 def create_directory(dir_name):
@@ -47,11 +48,10 @@ def call_bismark(reference_folder, reference):
     bs_call.append(reference_folder)
     bs_call.append(sam_file)
 
-
     print " ".join(bs_call)
 
-
-    subprocess.Popen(bs_call, cwd=output_dir)
+    sp = subprocess.Popen(bs_call, cwd=output_dir)
+    sp.wait()
 
     print "Finished running Bismark"
 
@@ -78,20 +78,39 @@ def file_exists(file_path):
     return os.path.exists(file_path)
 
 
+def sort_file(file_path):
+    print "Sorting all_cpgs file: " + str(file_path)
+
+    sorted_file_path = file_path[:-4] + "_sorted.txt"
+
+    cmd = ["sort", "-k", "1", file_path, ">", sorted_file_path]
+
+    print "cmd: " + " ".join(cmd)
+
+    s = subprocess.Popen(cmd, shell=True)
+    s.communicate()
+
+    subprocess.check_call(["dos2unix", sorted_file_path])
+
 
 
 def main():
     ## Human
     print "HUMAN"
     all_cpgs_human = "all_cpgs_only_pos_hg19a.txt"
-    if file_exists(all_cpgs_human):
+    if not file_exists(all_cpgs_human):
 	print "Final file exists: " + str(all_cpgs_human)
     else:
 	print "Start generating file"
-        tmp_bed_graph = call_bismark("/home/app/tabsat/reference/human/hg19", "hg19")
-	extract_positions(tmp_bed_graph, all_cpgs_human)
+        #tmp_bed_graph = call_bismark("/home/app/tabsat/reference/human/hg19", "hg19")
+	#extract_positions(tmp_bed_graph, all_cpgs_human)
+	sort_file(all_cpgs_human)
+	print "Done with hg19"
 
     print "\n"
+
+    sys.exit()
+
     print "MOUSE"
 
     ## Mouse
@@ -100,9 +119,10 @@ def main():
 	print "Final file exists: " + str(all_cpgs_mouse)
     else:
 	print "Start generating file"
-	print "do"
 	tmp_bed_graph = call_bismark("/home/app/tabsat/reference/mouse/mm10", "mm10")
 	extract_positions(tmp_bed_graph, all_cpgs_mouse)
+	sort_file(all_cpgs_mouse)
+	print "Done with mm10"
 
 
 
