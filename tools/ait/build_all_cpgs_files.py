@@ -66,10 +66,15 @@ def call_bismark(reference_folder, reference):
 def extract_positions(tmp_bed_graph, all_cpgs):
     print "Extract positions from: " + str(tmp_bed_graph)
 
+    ## Rename as file is unsorted
+    all_cpgs = all_cpgs[:-4] + "_unsorted.txt"
+
     with open(tmp_bed_graph) as org_cpg, open(all_cpgs, "w") as new_cpg:
 	csv_new = csv.writer(new_cpg, delimiter = "\t")
 	for row in csv.reader(org_cpg, delimiter = "\t"):
 	    csv_new.writerow([row[0] + "-" + row[1], row[2]])
+
+    return all_cpgs
 
 
 
@@ -81,35 +86,50 @@ def file_exists(file_path):
 def sort_file(file_path):
     print "Sorting all_cpgs file: " + str(file_path)
 
-    sorted_file_path = file_path[:-4] + "_sorted.txt"
+    sorted_file_path = file_path[:-13] + ".txt"
 
-    cmd = ["sort", "-k", "1", file_path, ">", sorted_file_path]
+    cmd = ["sort", "-k", "1", file_path, "-o", sorted_file_path]
 
     print "cmd: " + " ".join(cmd)
 
-    s = subprocess.Popen(cmd, shell=True)
+    s = subprocess.Popen(cmd)
     s.communicate()
 
     subprocess.check_call(["dos2unix", sorted_file_path])
+
+    ## Remove unsorted file
+    os.remove(file_path)
+
+
+def compress_file(file_path):
+    print "Compressing file"
+    file_path_compressed = file_path[:-4] + ".7z"
+
+    if file_exists(file_path_compressed):
+	print "Compressed file already exists, nothing to do"
+	return
+    else:
+	subprocess.check_call(["7z", "a", file_path_compressed, file_path])
 
 
 
 def main():
     ## Human
     print "HUMAN"
-    all_cpgs_human = "all_cpgs_only_pos_hg19a.txt"
-    if not file_exists(all_cpgs_human):
+    all_cpgs_human = "all_cpgs_only_pos_hg19.txt"
+    if file_exists(all_cpgs_human):
 	print "Final file exists: " + str(all_cpgs_human)
     else:
 	print "Start generating file"
-        #tmp_bed_graph = call_bismark("/home/app/tabsat/reference/human/hg19", "hg19")
-	#extract_positions(tmp_bed_graph, all_cpgs_human)
-	sort_file(all_cpgs_human)
+        tmp_bed_graph = call_bismark("/home/app/tabsat/reference/human/hg19", "hg19")
+	all_cpgs_human_unsorted = extract_positions(tmp_bed_graph, all_cpgs_human)
+	sort_file(all_cpgs_human_unsorted)
 	print "Done with hg19"
 
-    print "\n"
+    compress_file(all_cpgs_human)
+    print "Done with compressing"
 
-    sys.exit()
+    print "\n"
 
     print "MOUSE"
 
@@ -120,9 +140,12 @@ def main():
     else:
 	print "Start generating file"
 	tmp_bed_graph = call_bismark("/home/app/tabsat/reference/mouse/mm10", "mm10")
-	extract_positions(tmp_bed_graph, all_cpgs_mouse)
-	sort_file(all_cpgs_mouse)
+	all_cpgs_mouse_unsorted = extract_positions(tmp_bed_graph, all_cpgs_mouse)
+	sort_file(all_cpgs_mouse_unsorted)
 	print "Done with mm10"
+
+    compress_file(all_cpgs_mouse)
+    print "Done with compressing"
 
 
 
