@@ -156,6 +156,12 @@ files = paste0(getwd(), "/", dml.files, ".csv")
 #fileConn<-file("targetlength.txt")
 
 for (file in files) {
+    ## Check if file exists
+    if (! file.exists(file)) {
+	print(paste0("File does not exist: ", file))
+	next
+    }
+
     dataset <- read.table(file,  sep=",",na.strings="-", header=TRUE)
 
     ##DEBUG
@@ -180,11 +186,17 @@ for (file in files) {
     dataset$variable <- gsub("Reads_ME_","",dataset$variable)
     
     xaxes <- unique(dataset$pos)
+
+    print("Plotting adapted")
     plotting("adapted")
+
+    print("Plotting proportional")
     plotting("proportional")
+
 }
 
 print("Done printing all targets.")
+
 
 
 ################################# Change working directory to default ################################################
