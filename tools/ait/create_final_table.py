@@ -26,8 +26,6 @@ def get_default_cutoffs():
     return cov_sum_cutoff, cov_pos_cutoff, read_cutoff
 
 
-## File containing all cpgs
-default_all_cgps_file_path = os.environ['HOME'] + "/tabsat/tools/ait/all_cpgs_only_pos_hg19.txt"
 
 
 
@@ -37,7 +35,7 @@ default_all_cgps_file_path = os.environ['HOME'] + "/tabsat/tools/ait/all_cpgs_on
 # 
 #
 #
-def prepareInitalList(file_initial_list, cov_dir, all_cpg_file_path):
+def prepareInitalList(file_initial_list, cov_dir, all_cpg_file_path, read_cutoff):
 
     strand_information_buffer = dict()
 
@@ -69,7 +67,7 @@ def prepareInitalList(file_initial_list, cov_dir, all_cpg_file_path):
 
                     ## Prefill the buffer to increase speed
                     if first_pass_of_prefill:
-                        strand_information_buffer = prefill_strand_information_buffer(strand_information_buffer, cov_file, all_cpg_file_path)
+                        strand_information_buffer = prefill_strand_information_buffer(strand_information_buffer, cov_file, all_cpg_file_path, read_cutoff)
 
 
                     with open(cov_file) as f:
@@ -121,8 +119,13 @@ def prepareInitalList(file_initial_list, cov_dir, all_cpg_file_path):
                 first_pass_of_prefill = False
 
 
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
 
-def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_cpg_file_path):
+
+def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_cpg_file_path, read_cutoff):
 
     ## Build list of keys
     key_list = list()
@@ -132,6 +135,13 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
             line_split = line.strip().split()
             chr = line_split[0]
             pos = line_split[1]
+
+            meth = line_split[4]
+            un_meth = line_split[5]
+
+            ## Check if min cutoff is fulfilled
+            if int(meth) + int(un_meth) < read_cutoff:
+                continue
 
             new_key = chr + "-" + pos
 
@@ -143,10 +153,15 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
     print "Prefilling strand information buffer with " + str(len(key_list)) + " items"
 
 
-    ## Run grep on the CpG file
-    ps = subprocess.Popen(["echo", "-e", "\n".join(key_list)], stdout=subprocess.PIPE)
-    grep_result = subprocess.check_output(["grep", "-F", "-f", "-", all_cpg_file_path], stdin=ps.stdout)
-    ps.wait()
+    ## Run grep on the CpG file - split into chunks
+
+    grep_result = ""
+    for key_list_chunk in chunks(key_list, 100):
+        ps = subprocess.Popen(["echo", "-e", "\n".join(key_list_chunk)], stdout=subprocess.PIPE)
+        grep_result += subprocess.check_output(["grep", "-F", "-f", "-", all_cpg_file_path], stdin=ps.stdout)
+        ps.wait()
+
+
 
 
     #print str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
@@ -567,7 +582,7 @@ def filterNotReferenceCpGs(result_file, filtered_file, all_cpg_file_path):
 ## MAIN MAIN MAIN
 ##
 def main_method(target_list, cov_dir, usr_read_cutoff, all_cpg_file_path, mapper):
-    print "***** Generating final output table *****"
+    print "\n***** Generating final output table (Python) *****"
 
     ## Default cutoffs
     cov_sum_cutoff, cov_pos_cutoff, read_cutoff = get_default_cutoffs()
@@ -594,7 +609,7 @@ def main_method(target_list, cov_dir, usr_read_cutoff, all_cpg_file_path, mapper
 
     print "- preparing list"
     print str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
-    prepareInitalList(target_list, cov_dir, all_cpg_file_path)
+    prepareInitalList(target_list, cov_dir, all_cpg_file_path, read_cutoff)
     print str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
 
     print "- creating entries"
@@ -636,20 +651,23 @@ if __name__ == '__main__':
     target_list = sys.argv[1]
     cov_dir = sys.argv[2]
     mapper = sys.argv[3]
+    cpg_file_path = sys.argv[4]
 
     print "- target_list: " + str(target_list)
     print "- cov_dir: " + str(cov_dir)
     print "- mapper: " + str(mapper)
+    print "- cpg_file_path: " + str(cpg_file_path)
+
 
 
     usr_read_cutoff = None
     ## Reading hard cutoff value
-    if len(sys.argv) > 4:
-        usr_read_cutoff = int(sys.argv[4])
+    if len(sys.argv) > 5:
+        usr_read_cutoff = int(sys.argv[5])
         print "- using the read cutoff specified by the user: " + str(usr_read_cutoff)
 
 
-    main_method(target_list, cov_dir, usr_read_cutoff, default_all_cgps_file_path, mapper)
+    main_method(target_list, cov_dir, usr_read_cutoff, cpg_file_path, mapper)
 
 
 
