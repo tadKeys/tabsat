@@ -59,7 +59,7 @@ fi
 if [[ $4 ]];
 then
     seq_library=${4}
-    echo "$seq_library"
+    echo "- SeqLibrary: $seq_library"
 else
     echo "-- Please specify the sequence library: NONDIR or DIR/ $seq_library"
     exit 1
@@ -70,7 +70,7 @@ fi
 if [[ $5 ]];
 then
     aligner=${5}
-    echo "$aligner"
+    echo "- Aligner: $aligner"
 else
     echo "-- Please specify the aligner: bowtie2 or tmap"
     exit 1
