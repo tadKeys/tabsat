@@ -6,7 +6,7 @@ echo -e "*****************************\n\n"
 
 
 echo "**** Bismark ****"
-grep "Mapping efficiency" bismark/bismark.log
+grep "Mapping efficiency" bismark/run.log
 echo ""
 
 echo "**** BSMap ****"
