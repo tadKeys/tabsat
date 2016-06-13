@@ -271,7 +271,7 @@ do
 
     ############## Copy the CpH files
     echo "-- Copying the CpH files"
-    cp "${current_dir}/CH*txt" "cph"
+    cp ${current_dir}/CH*txt cph
 
 done
 
@@ -285,8 +285,22 @@ echo "-- .. done with combining idxstats"
 
 
 ############## Create final table
-echo "-- Creating final table.."
-    python ${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${ALIGNER} ${READ_CUTOFF}
+echo -e "\n-- Creating final table.."
+
+    ## Get the all_cpgs_file path
+    if [ $REFERENCE_GENOME == "hg19" ]
+    then
+	ALL_CPGS_FILE=${BASE_DIR}/tools/ait/all_cpgs_only_pos_hg19.txt
+    elif [ $REFERENCE_GENOME == "mm10" ]
+    then
+	ALL_CPGS_FILE=${BASE_DIR}/tools/ait/all_cpgs_only_pos_mm10.txt
+    else
+	echo "No all_cpgs_file present for reference: ${REFERENCE_GENOME}"
+	exit 1
+    fi
+
+
+    python ${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${ALIGNER} ${ALL_CPGS_FILE} ${READ_CUTOFF}
 echo "-- ... done with table creation."
 
 ## Link the final table
@@ -294,7 +308,7 @@ FINAL_TABLE="ResultMethylListOnlyReferenceCpGs.csv"
 ln -s ${COV_DIR}/${FINAL_TABLE}
 
 ## Produce the BED file
-echo "\n-- Creating final bed ..."
+echo -e "\n-- Creating final bed ..."
 FINAL_BED="ResultMethylListOnlyReferenceCpGs.bed"
 python ${FINAL_BED_SCRIPT} ${FINAL_TABLE} ${FINAL_BED}
 echo "-- .. done with bed creation."
@@ -303,20 +317,20 @@ echo "-- .. done with bed creation."
 
 ############## Create lollipop plots
 mkdir -p $COV_DIR/PLOTS
-echo "\n-- Create lollipop plots for every target"
+echo -e "\n-- Create lollipop plots for every target"
 echo "Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER} ${SORT_LIST}"
 Rscript --vanilla ${R_PLOTTING} ${COV_DIR} ${BS_SEQ} ${ALIGNER} ${SORT_LIST}
-echo "-- .. done with plotting."
+echo -e "-- .. done with plotting.\n"
 
 ## Remove csv tmp files
-for tmp_file_to_rm in `tail -n +2 MethylList.csv | cut -f 1 -d "," | sort | uniq`
+for tmp_file_to_rm in `tail -n +2 ${COV_DIR}/MethylList.csv | cut -f 1 -d "," | sort | uniq`
 do
     rm $COV_DIR/${tmp_file_to_rm}*
 done
 
 
 ############## Find methyl subpopulations
-echo "\n- CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}"
+echo -e "\n- CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}"
 bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}
 
 
