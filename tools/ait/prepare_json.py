@@ -54,7 +54,7 @@ class TabsatOutput:
         self.chr = row["chr"]
         self.start = row["start"]
         self.end = row["end"]
-        self.pos = row["Pos"]
+        self.pos = row["pos"]
         self.zip_file = insert_spacer_file_path(zip_file_path, None)
 
         ## To each sample properties are stored
@@ -81,7 +81,7 @@ class TabsatOutput:
         json_dict["Chr"] = self.chr
         json_dict["Start"] = self.start
         json_dict["End"] = self.end
-        json_dict["Pos"] = self.pos
+        json_dict["pos"] = self.pos
         json_dict["Zip"] = self.zip_file
 
         ## Create list of samples

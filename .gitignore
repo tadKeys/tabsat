@@ -1,0 +1,12 @@
+tabsat_test_output_miseq/
+tabsat_test_output_mouse/
+tabsat_test_output_tmap/
+
+comp_mapping/PGM*
+
+tools/twobittofa/
+
+tools/ait/all_cpgs_only_pos_hg19.txt
+tools/ait/all_cpgs_only_pos_mm10.txt
+
+comp_tools/bismark/PGM_316D*
