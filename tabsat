@@ -299,7 +299,7 @@ echo -e "\n-- Creating final table.."
 	exit 1
     fi
 
-
+    echo "${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${ALIGNER} ${ALL_CPGS_FILE} ${READ_CUTOFF}"
     python ${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${ALIGNER} ${ALL_CPGS_FILE} ${READ_CUTOFF}
 echo "-- ... done with table creation."
 
