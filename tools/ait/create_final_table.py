@@ -91,9 +91,6 @@ def prepareInitalList(file_initial_list, cov_dir, all_cpg_file_path, read_cutoff
                                         #print "cur_key in dict: " + str(cur_key)
                                         f_strand = strand_information_buffer[cur_key]
                                     else:
-                                        if cur_key == "chr1-3072455":
-                                            print "juhu"
-
                                         f_strand = get_strand_of_position(cur_key, all_cpg_file_path)
                                         strand_information_buffer[cur_key] = f_strand
 
@@ -155,11 +152,30 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
 
     ## Run grep on the CpG file - split into chunks
 
-    grep_result = ""
+    awk_result = ""
     for key_list_chunk in chunks(key_list, 100):
-        ps = subprocess.Popen(["echo", "-e", "\n".join(key_list_chunk)], stdout=subprocess.PIPE)
-        grep_result += subprocess.check_output(["grep", "-F", "-f", "-", all_cpg_file_path], stdin=ps.stdout)
-        ps.wait()
+
+        ## Using AWK instead of grep
+
+        cmd = ["awk"]
+        cmd += ["'/" + "\s|".join(key_list_chunk) + "/'"]
+        cmd += [all_cpg_file_path]
+
+        ## DEBUG
+        #print ""
+        #print " ".join(cmd)
+        #print ""
+
+        tmp_awk_result = subprocess.check_output(" ".join(cmd), shell=True)
+
+        print tmp_awk_result
+
+        if tmp_awk_result:
+            awk_result += tmp_awk_result
+        else:
+            print "awk result is empty"
+
+
 
 
 
@@ -180,14 +196,23 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
     #print len(key_list)
     #print grep_result
 
-    grep_result_list = grep_result.strip().split("\n")
-    for result in grep_result_list:
-        s_result = result.split("\t")
+    awk_result_list = awk_result.strip().split("\n")
 
-        if s_result[0] not in strand_information_buffer:
-            strand_information_buffer[s_result[0]] = s_result[1]
+    ## DEBUG
+    #print "awk_result_list: " + str(awk_result_list)
+
+    if not awk_result_list or len(awk_result_list) == 0 or (len(awk_result_list) == 1 and awk_result_list[0] == ""):
+        print "awk_result_list is empty"
+    else:
+        for result in awk_result_list:
+            s_result = result.split("\t")
+
+            if s_result[0] not in strand_information_buffer:
+                strand_information_buffer[s_result[0]] = s_result[1]
 
 
+    ## DEBUG
+    #print "strand_information_buffer" + str(strand_information_buffer)
 
     return strand_information_buffer
 
