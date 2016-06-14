@@ -12,7 +12,6 @@ Available as
 * [Platomics](www.platomics.com) app - see [demo](demo.md)
 * Source code
 
-Please check out the Sourceforge page: http://sourceforge.net/projects/tabsat/
 
 ## Example usage
 ```sh
@@ -40,6 +39,10 @@ Test with separate input files
 ```sh
 tabsat -l NONDIR -g hg19 -t target.csv -o test_output_files xy.fastq abs.fastq
 ```
+
+## Test data
+Test data is available [here](test_data)
+
 
 
 ## Installation
