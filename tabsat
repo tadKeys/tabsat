@@ -368,5 +368,12 @@ python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats cph ${FIN
 
 
 
-
 #################################################End of Worfklow#########################################
+
+echo -e "\n"
+echo -e "Finished analyzing the data.\n"
+echo -e "##########################################"
+echo -e "##  Thank you for using TABSAT!         ##"
+echo -e "##  github.com/tadKeys/tabsat           ##"
+echo -e "##########################################\n"
+

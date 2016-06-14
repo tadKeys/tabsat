@@ -168,7 +168,8 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
 
         tmp_awk_result = subprocess.check_output(" ".join(cmd), shell=True)
 
-        print tmp_awk_result
+        ## DEBUG
+        #print tmp_awk_result
 
         if tmp_awk_result:
             awk_result += tmp_awk_result
