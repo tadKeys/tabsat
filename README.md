@@ -18,9 +18,9 @@ Available as
 ${TABSAT} -l NONDIR -g hg19 -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir input.fastq
 ```
 **-t** Targetlist in CSV format [example](https://github.com/tadKeys/tabsat/blob/master/tools/zz_test/target_list.csv) [mandatory] - Strand can be "+", "-", "+/-"<br />
-**-e** Sequencing library - SE/PE (PE reads must be called *_1.fastq, *_2.fastq) <br />
-**-l** Library mode of bisulfite experiment<br />
+**-e** Sequencing library - SE/PE (PE reads must be called \*_1.fastq, \*_2.fastq)<br />
 **-g** Genome (hg19, mm10)<br />
+**-l** Library mode of bisulfite experiment<br />
 **-a** *[optional]* Specify the aligner that should be used<br />
 **-m** *[optional]* This parameter is used for filtering reads that are shorter than the given threshold.<br />
 **-q** *[optional]* Bases that are below the given threshold are removed from the 3’ end of the reads (read trimming)<br />
