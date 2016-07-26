@@ -153,7 +153,7 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
     ## Run grep on the CpG file - split into chunks
 
     awk_result = ""
-    for key_list_chunk in chunks(key_list, 100):
+    for key_list_chunk in chunks(key_list, 1000):
 
         ## Using AWK instead of grep
 
@@ -165,6 +165,28 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
         #print ""
         #print " ".join(cmd)
         #print ""
+        
+        
+        ## Test with gnu parallel -> not faster
+        
+        #cmd1 = ["cat"]
+        #cmd1 += [all_cpg_file_path]
+        #cmd1 += ["|"]
+        #cmd1 += ["/home/app/tabsat/tools/gnu_parallel/parallel-20160722/src/parallel"]
+        #cmd1 += ["--pipe"]
+        #cmd1 += ["awk"]
+        #cmd1 += ["\\'\/" + "\\\s\|".join(key_list_chunk) + "\/\\'"]
+        
+        #print " ".join(cmd1)
+        
+        
+        #gnu_parallel_cmd = "/home/stephan/bin/gnu_parallel/parallel-20160222/src/parallel"
+        #ps = subprocess.Popen(["echo", "-e", "\n".join(key_list)], stdout=subprocess.PIPE)
+        #grep_result = subprocess.check_output([gnu_parallel_cmd, "--pipe", "-L1000", "--round-robin",
+        #                                       "grep", "-F", "-f", "-", all_cpg_file_path], stdin=ps.stdout)
+        #ps.wait()
+        
+        
 
         tmp_awk_result = subprocess.check_output(" ".join(cmd), shell=True)
 
@@ -220,6 +242,10 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
 
 
 def perform_grep_with_cur_key(cur_key, all_cpg_file_path):
+    
+    print "Perform grep with cur key"
+    print " ".join(["grep", cur_key, all_cpg_file_path])
+    
     return subprocess.check_output(["grep", cur_key, all_cpg_file_path])
 
 
@@ -418,11 +444,12 @@ def filterLowCovCalls(result_file, filtered_file, cov_sum_cutoff, cov_pos_cutoff
         header_printed = 0
         for m_line in csvreader:
             # Skip header line
-            if (not header_printed):
+            if not header_printed:
                 header_printed = 1
                 continue
 
-                # print m_line
+            ## DEBUG
+            #print m_line
 
             sample_index = 0
 
@@ -435,6 +462,10 @@ def filterLowCovCalls(result_file, filtered_file, cov_sum_cutoff, cov_pos_cutoff
             ## Index where to start
             i = index_to_start
             while (i < len(m_line)):
+                
+                ## DEBUG
+                #print i
+                
                 ## Methylated reads
                 me_r = m_line[i]
 
@@ -668,6 +699,42 @@ def main_method(target_list, cov_dir, usr_read_cutoff, all_cpg_file_path, mapper
 
 
 
+def check_target_list(target_list):
+    
+    print "- checking the target list"
+    
+    if not os.path.exists(target_list):
+        print "- target_list not present: " + str(target_list)
+        sys.exit()
+        
+    with open(target_list) as tl:
+        header = ["Name", "chr", "start", "end", "strand"]
+        
+        checked_header = False
+        for line in tl:
+            s_line = line.split("\t")
+            
+            line = line.strip()
+            
+            ## Check line length
+            if len(s_line) != 5:
+                print "- wrong number of columns in target file line: " + str(s_line)
+                sys.exit()
+            
+            
+            ## Split again with strip
+            s_line = line.strip().split("\t")
+            
+            if not checked_header:
+                if s_line != header:
+                    print "- header is not ok for target file: " + str(s_line) + " - should be: " + "\t".join(header)                    
+                    sys.exit()
+                    
+                checked_header = True
+                
+
+    print "- target list is ok"
+
 
 
 
@@ -684,6 +751,9 @@ if __name__ == '__main__':
     print "- mapper: " + str(mapper)
     print "- cpg_file_path: " + str(cpg_file_path)
 
+
+    ## Check the target list    
+    check_target_list(target_list)
 
 
     usr_read_cutoff = None
