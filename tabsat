@@ -1,10 +1,11 @@
 #!/bin/bash
 
-TABSAT_VERSION="1.0.0"
+TABSAT_VERSION="1.0.1"
 USER_HOME=$HOME
 BASE_DIR="${USER_HOME}/tabsat"
 FINAL_TABLE_SCRIPT="${BASE_DIR}/tools/ait/create_final_table.py"
 FINAL_BED_SCRIPT="${BASE_DIR}/tools/ait/convert_final_table_to_bed.py"
+CHECK_QUALITY_SCRIPT="${BASE_DIR}/tools/ait/check_quality.sh"
 FINAL_COMBINE_IDXSTATS_SCRIPT="${BASE_DIR}/tools/ait/combine_idx_stats.py"
 R_PLOTTING="${BASE_DIR}/tools/ait/lollipop.R"
 METHYL_SUBPOP="${BASE_DIR}/tools/MethylSubpop/subpopulations.sh"
@@ -12,7 +13,7 @@ BISMARK_RUN="${BASE_DIR}/02_meth_pipe.sh"
 JSON_CREATOR="${BASE_DIR}/tools/ait/prepare_json.py"
 
 usage () {
-    echo -e "\nUsage: $0 -t targetlist -e <SE|PE> -l <DIR|NONDIR> -g <hg19|mm10> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -m min_read_length -q min_read_qual -p percent_target_for_patterns -r min_number_reads_cpg -s sort_list -o outputdirectory [files] \n"
+    echo -e "\nUsage: $0 -t targetlist -e <SE|PE> -l <DIR|NONDIR> -g <hg19|mm10> -d inputdirectory [with list of files] -a aligner <bowtie2|tmap> -m min_read_length -x max_read_length -q min_read_qual -p percent_target_for_patterns -r min_number_reads_cpg -s sort_list -o outputdirectory [files] \n"
 }
 
 version () {
@@ -21,7 +22,7 @@ version () {
 
 
 ############# Filtering of parameters
-while getopts ":hvt:e:l:d:o:a:m:q:p:r:s:g:" option; do
+while getopts ":hvt:e:l:d:o:a:m:x:q:p:r:s:g:" option; do
 	case "$option" in
 		h) usage
 		   exit 0 ;;
@@ -34,6 +35,7 @@ while getopts ":hvt:e:l:d:o:a:m:q:p:r:s:g:" option; do
 		o) OUTPUT_DIR=${OPTARG};;
 		a) ALIGNER=${OPTARG};;
 		m) MIN_READ_LEN=${OPTARG};;
+		x) MAX_READ_LEN=${OPTARG};;
 		q) MIN_READ_QUAL=${OPTARG};;
 		p) PERCENT_TARGET=${OPTARG};;
 		r) READ_CUTOFF=${OPTARG};;
@@ -109,11 +111,20 @@ if [ -z "${MIN_READ_QUAL}" ]; then
 fi
 echo "- MIN_READ_QUAL: ${MIN_READ_QUAL}"
 
+
 if [ -z "$MIN_READ_LEN" ]; then
   echo "- Minimum read length not specified. Setting it to 8"
   MIN_READ_LEN="8"
 fi
 echo "- MIN_READ_LEN: ${MIN_READ_LEN}"
+
+
+if [ -z "$MAX_READ_LEN" ]; then
+  echo "- Maximum read length not specified. Setting it to 100000"
+  MAX_READ_LEN="100000"
+fi
+echo "- MAX_READ_LEN: ${MAX_READ_LEN}"
+
 
 if [ -z "$PERCENT_TARGET" ]; then
   echo "- Percent Target not specified. Setting it to 0.8"
@@ -196,6 +207,10 @@ mkdir idxstats
 ## Create dir cph
 mkdir cph
 
+## Create directory for qualities
+echo "-- Creating quality directory"
+mkdir quality
+
 echo -e "\n"
 
 base_pwd_dir=`pwd`
@@ -233,9 +248,9 @@ do
 	    fi
 	done
     
-	bash ${BISMARK_RUN} ${file} ${current_dir} ${TARGET_LIST} ${BS_SEQ} ${ALIGNER} ${MIN_READ_LEN} ${MIN_READ_QUAL} ${REFERENCE_GENOME} ${LIBRARY} ${file_pe}
+	bash ${BISMARK_RUN} ${file} ${current_dir} ${TARGET_LIST} ${BS_SEQ} ${ALIGNER} ${MIN_READ_LEN} ${MAX_READ_LEN} ${MIN_READ_QUAL} ${REFERENCE_GENOME} ${LIBRARY} ${file_pe}
     else
-        bash ${BISMARK_RUN} ${file} ${current_dir} ${TARGET_LIST} ${BS_SEQ} ${ALIGNER} ${MIN_READ_LEN} ${MIN_READ_QUAL} ${REFERENCE_GENOME} ${LIBRARY}
+        bash ${BISMARK_RUN} ${file} ${current_dir} ${TARGET_LIST} ${BS_SEQ} ${ALIGNER} ${MIN_READ_LEN} ${MAX_READ_LEN} ${MIN_READ_QUAL} ${REFERENCE_GENOME} ${LIBRARY}
     fi
 
 
@@ -243,14 +258,20 @@ do
 
     echo -e "\nCopying coverage files"
     echo "cp ${current_dir}/*.cov $COV_DIR"
+    /bin/bash -c "cp ${current_dir}/*.cov ${COV_DIR}/"
 
     echo -e "\nCopying CpG files with strand information"
     echo "cp ${current_dir}/CpG_*txt $CPG_DIR"
-    echo ""
+    /bin/bash -c "cp ${current_dir}/CpG_*txt ${CPG_DIR}/"
 
-    /bin/bash -c "cp ${current_dir}/*.cov ${COV_DIR}/"
+    echo -e "\nCopying SAM files"
     /bin/bash -c "cp ${current_dir}/*.sam ${POP_DIR}/"
+
+    echo -e "\nCopying qc files"
     /bin/bash -c "cp ${current_dir}/*html qc"
+
+
+    echo ""
 
     ## Create samtools stats
     current_sam=`ls ${current_dir}/*sam`
@@ -269,9 +290,15 @@ do
     samtools idxstats "${current_bam}.sorted.bam" > "${current_dir}/${current}.idxstats"
     cp "${current_dir}/${current}.idxstats" "idxstats"
 
-    ############## Copy the CpH files
+    ## Copy the CpH files
     echo "-- Copying the CpH files"
     cp ${current_dir}/CH*txt cph
+
+    ## Create quality stats
+    ${CHECK_QUALITY_SCRIPT} ${OUTPUT_DIR}/quality ${TARGET_LIST} ${current_bam}.sorted.bam
+
+
+
 
 done
 
@@ -339,6 +366,7 @@ bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}
 echo "-- Copying the plots"
 mkdir plots
 cp ${COV_DIR}/PLOTS/* plots/
+
 
 
 

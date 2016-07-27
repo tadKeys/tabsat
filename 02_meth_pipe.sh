@@ -25,7 +25,6 @@ echo -e "\n- Starting 02_meth_pipe.sh\n"
 
 echo $@
 
-
 if [ -n "$1" ];
 then
     file=${1}
@@ -89,16 +88,26 @@ echo "- param_min_length: ${param_min_length}"
 
 if [[ $7 ]];
 then
-    param_min_qual=${7}
+    param_max_length=${7}
+else
+    param_max_length="100000"
+fi
+echo "- param_max_length: ${param_max_length}"
+
+
+
+if [[ $8 ]];
+then
+    param_min_qual=${8}
 else
     param_min_qual="20"
 fi
 echo "- param_min_qual: ${param_min_qual}"
 
 
-if [[ $8 ]];
+if [[ $9 ]];
 then
-    param_ref_genome=${8}
+    param_ref_genome=${9}
 else
     echo "- Assuming human reference is needed"
     param_ref_genome="hg19"
@@ -106,11 +115,11 @@ fi
 echo "- param_ref_genome: ${param_ref_genome}"
 
 
-if [[ $9 ]];
+if [[ ${10} ]];
 then
-    if [ $9 == "SE" ] || [ $9 == "PE" ]
+    if [ ${10} == "SE" ] || [ ${10} == "PE" ]
     then
-        param_seq_library=${9}
+        param_seq_library=${10}
     else
 	echo "- Please specify a correct sequencing library (SE,PE)"
 	exit 1
@@ -127,9 +136,9 @@ echo "- param_seq_library: ${param_seq_library}"
 if [ $param_seq_library == "PE" ]
 then
     echo "- PE library - looking for second file"
-    if [[ $10 ]];
+    if [[ ${11} ]];
     then
-	file_pe=${10}
+	file_pe=${11}
 	echo "- Found 2nd PE file: ${file_pe}"
     else
 	echo "- No second file for PE specified"
@@ -172,6 +181,7 @@ then
     SCRIPT_METH_EXT=${SCRIPT_METH_BOWTIE2}
 else
     aligner="--tmap -E 1 -g 3"
+    #aligner="--tmap"
     REFPATH=${REFPATH_TMAP}
     SCRIPT=${SCRIPT_TMAP}
     SCRIPT_METH_EXT=${SCRIPT_METH_TMAP}
@@ -217,12 +227,12 @@ if [ $param_seq_library == "SE" ]
 then
     echo "-- Filter for SE"
     FILENAME=`basename ${file} .fastq`
-    perl ${PRINSEQLITE} -fastq ${file} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len ${param_min_length} -trim_qual_right ${param_min_qual} -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming.log
+    perl ${PRINSEQLITE} -fastq ${file} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len ${param_min_length} -max_len ${param_max_length} -trim_qual_right ${param_min_qual} -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming.log
 else
     echo "-- Filter for PE"
     FILENAME=`basename ${file} _1.fastq`
     echo "- FILENAME in PE setting: ${FILENAME}"
-    perl ${PRINSEQLITE} -fastq ${file} -fastq2 ${file_pe} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len ${param_min_length} -trim_qual_right ${param_min_qual} -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming_pe.log
+    perl ${PRINSEQLITE} -fastq ${file} -fastq2 ${file_pe} -out_good "${outputfolder}/${FILENAME}_trimmed" -min_len ${param_min_length} -max_len ${param_max_length} -trim_qual_right ${param_min_qual} -trim_qual_rule lt -out_bad "${outputfolder}/${FILENAME}_bad" &> ${outputfolder}/prinseq_trimming_pe.log
 fi
 
 echo "-- ... done performing filtering/trimming"
