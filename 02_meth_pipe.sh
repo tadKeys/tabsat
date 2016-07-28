@@ -220,7 +220,7 @@ fi
 ## Prinseq filtering and trimming
 ##
 
-echo "-- Performing Fastq filtering/trimming (filter min-length: ${param_min_length}bp, trim 3' end quality <${param_min_qual})"
+echo "-- Performing Fastq filtering/trimming (filter min-length: ${param_min_length}bp, max-length: ${param_max_length}bp, trim 3' end quality <${param_min_qual})"
 
 
 if [ $param_seq_library == "SE" ]

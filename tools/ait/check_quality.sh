@@ -60,26 +60,26 @@ NON_INTERSECT_COV_MERGED_BED="${QUALITY_DIR}/${BAM_FILE_BASENAME_WO_SUFFIX}.non_
 INTERSECT_COV_MERGED_BED="${QUALITY_DIR}/${BAM_FILE_BASENAME_WO_SUFFIX}.intersect_cov_merged.bed"
 
 ## Create an off-target BAM file
-#samtools sort -o ${BAM_FILE} aa | ${INTERSECTBED} -v -a - -b ${QUALITY_DIR}/target_list.bed > ${NON_INTERSECT_BAM}
+samtools sort -o ${BAM_FILE} aa | ${INTERSECTBED} -v -a - -b ${QUALITY_DIR}/target_list.bed > ${NON_INTERSECT_BAM}
 
 ## Create an on-target BAM file
-#samtools sort -o ${BAM_FILE} aa | ${INTERSECTBED} -a - -b ${QUALITY_DIR}/target_list.bed > ${INTERSECT_BAM}
+samtools sort -o ${BAM_FILE} aa | ${INTERSECTBED} -a - -b ${QUALITY_DIR}/target_list.bed > ${INTERSECT_BAM}
 
 
 
 ## Calculate coverage of off-target sites
-#${GENOMECOVERAGE} -ibam ${NON_INTERSECT_BAM} -bg > ${NON_INTERSECT_COV_BED}
+${GENOMECOVERAGE} -ibam ${NON_INTERSECT_BAM} -bg > ${NON_INTERSECT_COV_BED}
 
 ## Calculate coverage of on-target sites
-#${GENOMECOVERAGE} -ibam ${INTERSECT_BAM} -bg > ${INTERSECT_COV_BED}
+${GENOMECOVERAGE} -ibam ${INTERSECT_BAM} -bg > ${INTERSECT_COV_BED}
 
 
 
 ## Merge off-target coverage file and limit to regions with coverage greater than 0
-#cat ${NON_INTERSECT_COV_BED} | awk '$4 > 100' | ${MERGEBED} -i - -c 4 -o mean > ${NON_INTERSECT_COV_MERGED_BED}
+cat ${NON_INTERSECT_COV_BED} | awk '$4 > 100' | ${MERGEBED} -i - -c 4 -o mean > ${NON_INTERSECT_COV_MERGED_BED}
 
 ## Merge on-target coverage file and limit to regions with coverage greater than 0
-#cat ${INTERSECT_COV_BED} | awk '$4 > 100' | ${MERGEBED} -i - -c 4 -o mean > ${INTERSECT_COV_MERGED_BED}
+cat ${INTERSECT_COV_BED} | awk '$4 > 100' | ${MERGEBED} -i - -c 4 -o mean > ${INTERSECT_COV_MERGED_BED}
 
 
 ## Create a summary

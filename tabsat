@@ -6,6 +6,7 @@ BASE_DIR="${USER_HOME}/tabsat"
 FINAL_TABLE_SCRIPT="${BASE_DIR}/tools/ait/create_final_table.py"
 FINAL_BED_SCRIPT="${BASE_DIR}/tools/ait/convert_final_table_to_bed.py"
 CHECK_QUALITY_SCRIPT="${BASE_DIR}/tools/ait/check_quality.sh"
+BUILD_QUALITY_SUMMARY_SCRIPT="${BASE_DIR}/tools/ait/build_quality_summary.sh"
 FINAL_COMBINE_IDXSTATS_SCRIPT="${BASE_DIR}/tools/ait/combine_idx_stats.py"
 R_PLOTTING="${BASE_DIR}/tools/ait/lollipop.R"
 METHYL_SUBPOP="${BASE_DIR}/tools/MethylSubpop/subpopulations.sh"
@@ -220,7 +221,7 @@ for file in $FILEARRAY
 do
     current="$(basename "$file" .fastq)"
     current_dir="${base_pwd_dir}/${current}_${BS_SEQ}_${ALIGNER}"
-    echo "- Basename: ${current}"
+    echo -e "\n\n- Basename: ${current}"
     echo "- current_dir: ${current_dir}"
     echo -e "\n- Running Bismark... \n"
 
@@ -295,6 +296,8 @@ do
     cp ${current_dir}/CH*txt cph
 
     ## Create quality stats
+    echo "-- Creating quality stats"
+    echo "${CHECK_QUALITY_SCRIPT} ${OUTPUT_DIR}/quality ${TARGET_LIST} ${current_bam}.sorted.bam"
     ${CHECK_QUALITY_SCRIPT} ${OUTPUT_DIR}/quality ${TARGET_LIST} ${current_bam}.sorted.bam
 
 
@@ -367,7 +370,8 @@ echo "-- Copying the plots"
 mkdir plots
 cp ${COV_DIR}/PLOTS/* plots/
 
-
+##############  Build quality summary
+${BUILD_QUALITY_SUMMARY_SCRIPT} ${OUTPUT_DIR}/quality
 
 
 
