@@ -705,7 +705,7 @@ def check_target_list(target_list):
     
     if not os.path.exists(target_list):
         print "- target_list not present: " + str(target_list)
-        sys.exit()
+        sys.exit(1)
         
     with open(target_list) as tl:
         header = ["Name", "chr", "start", "end", "strand"]
@@ -719,7 +719,7 @@ def check_target_list(target_list):
             ## Check line length
             if len(s_line) != 5:
                 print "- wrong number of columns in target file line: " + str(s_line)
-                sys.exit()
+                sys.exit(1)
             
             
             ## Split again with strip
@@ -728,12 +728,14 @@ def check_target_list(target_list):
             if not checked_header:
                 if s_line != header:
                     print "- header is not ok for target file: " + str(s_line) + " - should be: " + "\t".join(header)                    
-                    sys.exit()
+                    sys.exit(1)
                     
                 checked_header = True
                 
 
     print "- target list is ok"
+
+    return "ok"
 
 
 

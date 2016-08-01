@@ -92,9 +92,8 @@ echo "Number of reads on target: ${summary_num_reads_target}" >> ${SUMMARY_FILE}
 summary_num_reads_off_target=`samtools view ${NON_INTERSECT_BAM} | wc -l`
 echo "Number of reads off target: ${summary_num_reads_off_target}" >> ${SUMMARY_FILE}
 
-
 summary_num_off_target=`cat ${NON_INTERSECT_COV_MERGED_BED} | wc -l`
-echo "Number of targets: ${summary_num_off_target}" >> ${SUMMARY_FILE}
+echo "Number of targets (> 100 coverage): ${summary_num_off_target}" >> ${SUMMARY_FILE}
 
 
 
