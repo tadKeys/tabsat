@@ -8,6 +8,7 @@ FINAL_TABLE_SCRIPT="${BASE_DIR}/tools/ait/create_final_table.py"
 FINAL_BED_SCRIPT="${BASE_DIR}/tools/ait/convert_final_table_to_bed.py"
 CHECK_QUALITY_SCRIPT="${BASE_DIR}/tools/ait/check_quality.sh"
 BUILD_QUALITY_SUMMARY_SCRIPT="${BASE_DIR}/tools/ait/build_quality_summary.sh"
+SUMMARIZE_OFF_TARGET_REGIONS="${BASE_DIR}/tools/ait/summarize_off_target_regions.py"
 FINAL_COMBINE_IDXSTATS_SCRIPT="${BASE_DIR}/tools/ait/combine_idx_stats.py"
 R_PLOTTING="${BASE_DIR}/tools/ait/lollipop.R"
 METHYL_SUBPOP="${BASE_DIR}/tools/MethylSubpop/subpopulations.sh"
@@ -175,7 +176,7 @@ fi
 python ${TARGET_LIST_CHECKER} ${TARGET_LIST}
 check_return_code=$?
 
-echo ${check_return_code}
+#echo ${check_return_code}
 if [[ ${check_return_code} != 0 ]]
 then
     echo "Target list is not in the correct format"
@@ -437,9 +438,11 @@ echo "-- Copying the plots"
 mkdir plots
 cp ${COV_DIR}/PLOTS/* plots/
 
+
+
 ##############  Build quality summary
 ${BUILD_QUALITY_SUMMARY_SCRIPT} ${OUTPUT_DIR}/quality
-
+python ${SUMMARIZE_OFF_TARGET_REGIONS} "${OUTPUT_DIR}/quality" "${OUTPUT_DIR}/quality/01_summary_off_targets.csv"
 
 
 ############## Convert all plots to pngs
