@@ -76,10 +76,10 @@ ${GENOMECOVERAGE} -ibam ${INTERSECT_BAM} -bg > ${INTERSECT_COV_BED}
 
 
 ## Merge off-target coverage file and limit to regions with coverage greater than 0
-cat ${NON_INTERSECT_COV_BED} | awk '$4 > 100' | ${MERGEBED} -i - -c 4 -o mean > ${NON_INTERSECT_COV_MERGED_BED}
+cat ${NON_INTERSECT_COV_BED} | awk '$4 > 50' | ${MERGEBED} -i - -c 4 -o mean > ${NON_INTERSECT_COV_MERGED_BED}
 
 ## Merge on-target coverage file and limit to regions with coverage greater than 0
-cat ${INTERSECT_COV_BED} | awk '$4 > 100' | ${MERGEBED} -i - -c 4 -o mean > ${INTERSECT_COV_MERGED_BED}
+cat ${INTERSECT_COV_BED} | awk '$4 > 50' | ${MERGEBED} -i - -c 4 -o mean > ${INTERSECT_COV_MERGED_BED}
 
 
 ## Create a summary
@@ -93,7 +93,7 @@ summary_num_reads_off_target=`samtools view ${NON_INTERSECT_BAM} | wc -l`
 echo "Number of reads off target: ${summary_num_reads_off_target}" >> ${SUMMARY_FILE}
 
 summary_num_off_target=`cat ${NON_INTERSECT_COV_MERGED_BED} | wc -l`
-echo "Number of targets (> 100 coverage): ${summary_num_off_target}" >> ${SUMMARY_FILE}
+echo "Number of targets (> 50 coverage): ${summary_num_off_target}" >> ${SUMMARY_FILE}
 
 
 
