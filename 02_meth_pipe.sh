@@ -279,13 +279,17 @@ echo "-- ... done with bismark."
 
 SAM_FILE="${outputfolder}/${FILENAME}*.sam"
 
+
+## Copy the sam file away to preserve
+cp ${SAM_FILE} "${outputfolder}/zz_after_bismark.sam.bak"
+
+
 ##
 ## Methyl extraction
 ##
 echo "-- Performing methyl extraction on SAM_FILE: ${SAM_FILE} ..."
 ${SCRIPT_METH_EXT} -s --bedGraph ${SAM_FILE} -o ${outputfolder} &> "${outputfolder}/extracter.log"
 echo "-- ... done with methyl extraction."
-
 
 
 
