@@ -81,10 +81,10 @@ echo ${NON_INTERSECT_COV_BED}
 
 if [[ $(cat ${NON_INTERSECT_COV_BED} | awk '$4 > 50') ]];
 then
-    echo "lines in non_empty intersect cov_bed"
+    echo "lines in no-intersect cov_bed"
     cat ${NON_INTERSECT_COV_BED} | awk '$4 > 50' | ${MERGEBED} -i - -c 4 -o mean > ${NON_INTERSECT_COV_MERGED_BED}
 else
-    echo "empty non-intersect cov_bed"
+    echo "empty no-intersect cov_bed"
     touch ${NON_INTERSECT_COV_MERGED_BED}
 fi
 
@@ -93,7 +93,7 @@ fi
 ## Merge on-target coverage file and limit to regions with coverage greater than 0
 if [[ $(cat ${INTERSECT_COV_BED} | awk '$4 > 50') ]]; 
 then 
-    echo "lines in empty intersect cov_bed"
+    echo "lines in intersect cov_bed"
     cat ${INTERSECT_COV_BED} | awk '$4 > 50' | ${MERGEBED} -i - -c 4 -o mean > ${INTERSECT_COV_MERGED_BED}
 else
     echo "empty intersect cov_bed"
