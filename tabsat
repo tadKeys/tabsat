@@ -150,7 +150,7 @@ if [ -z "$SORT_LIST" ]; then
   echo "- Sort list not specified. Setting it to ''"
   SORT_LIST=""
 fi
-echo "- READ_CUTOFF: ${READ_CUTOFF}"
+echo "- SORT_LIST: ${SORT_LIST}"
 
 
 if [[ -z "$INPUTDIR" && -z "$@" ]]; then

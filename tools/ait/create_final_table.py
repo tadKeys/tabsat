@@ -545,10 +545,10 @@ def filterLowCovCalls(result_file, filtered_file, cov_sum_cutoff, cov_pos_cutoff
                 ## Don't trust calls where 'cutoff value' reads where used
                 if sum_cov <= cov_sum_cutoff and (int(me_r) <= cov_pos_cutoff or int(um_r) <= cov_pos_cutoff):
 
-                    #print "Sample " + key + " does not have enough coverage for hard cutoff or me/um cutoff:"
-                    #print "sum_cov: " + str(sum_cov) + "/" + str(cov_sum_cutoff)
-                    #print "ME: " + str(int(me_r)) + "/" + str(cov_pos_cutoff)
-                    #print "UM: " + str(int(um_r)) + "/" + str(cov_pos_cutoff)
+                    print "Sample " + key + " does not have enough coverage for hard cutoff or me/um cutoff:"
+                    print "sum_cov: " + str(sum_cov) + "/" + str(cov_sum_cutoff)
+                    print "ME: " + str(int(me_r)) + "/" + str(cov_pos_cutoff)
+                    print "UM: " + str(int(um_r)) + "/" + str(cov_pos_cutoff)
 
                     m_line[me_index] = "-"
                     m_line[um_index] = "-"
@@ -584,13 +584,13 @@ def filterLowCovCalls(result_file, filtered_file, cov_sum_cutoff, cov_pos_cutoff
                 ## Filter low cov positions
                 if sum_cov < cutoff_cov:
 
-                    #print "\nRemoving sample because of cutoff cov"
-                    #print "key: " + str(key)
-                    #print "sample_index: " + str(sample_index)
-                    #print "i: " + str(i)
-                    #print "sample_cov[key]: " + str(sample_cov[key])
-                    #print "cutoff_cov: " + str(cutoff_cov)
-                    #print "sum_cov: " + str(sum_cov)
+                    print "\nRemoving sample because of cutoff cov"
+                    print "key: " + str(key)
+                    print "sample_index: " + str(sample_index)
+                    print "i: " + str(i)
+                    print "sample_cov[key]: " + str(sample_cov[key])
+                    print "cutoff_cov: " + str(cutoff_cov)
+                    print "sum_cov: " + str(sum_cov)
 
                     m_line[me_index] = "-"
                     m_line[um_index] = "-"
