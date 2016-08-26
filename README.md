@@ -12,6 +12,10 @@ Available as
 * [Platomics](www.platomics.com) app - see [demo](demo.md)
 * Source code
 
+## Publication
+TABSAT is published:<br/>
+http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0160227
+
 
 ## Example usage
 ```sh
