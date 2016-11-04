@@ -79,7 +79,7 @@ if [ -z "$TARGET_LIST" ]; then
 fi
 
 if [ -z "$LIBRARY" ]; then
-  echo "- Error: You need to specify a sequencing library file using -e (SE or PE)"
+  echo "- Error: You need to specify a sequencing library using -e (SE or PE)"
   usage
   exit 1
 fi

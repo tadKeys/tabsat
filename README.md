@@ -32,7 +32,7 @@ ${TABSAT} -l NONDIR -g hg19 -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o out
 **-r**: *[optional]* Minimum number of mapped reads that need to be present at each CpG site.	<br />
 **-s**: *[optional]* Sorted list of samples that is used to specify the order in the lollipop plots.<br />
 **-o** Output directory<br />
-**-d** List of inputfiles; if not specified, the input files are added at the end [optional]<br />
+**-d** Directory of inputfiles (absolute path); if not specified, the input files are added at the end [optional]<br />
 
 #### Examples
 Test with input file directory
