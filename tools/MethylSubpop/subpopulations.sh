@@ -3,18 +3,19 @@
 # gawk is required: sudo apt-get install gawk
 
 usage () {
-    echo "usage: $0 -i <input directory> -p percent_target"
+    echo "usage: $0 -i <input directory> -p percent_target -t targetlist"
 }
 
 echo "Starting with methylation pattern analysis"
 
 #Filerting of parameters
-while getopts "hi:p:" option; do
+while getopts "hi:p:t:" option; do
     case "$option" in
 	h) usage
 	   exit 0 ;;
 	i) INDIR=${OPTARG} ;;
 	p) PERCENT_TARGET=${OPTARG} ;;
+	t) TARGET_LIST=${OPTARG} ;;
 	?) echo "Error: unknown option $OPTARG"
 	   usage
 	   exit 1;;
@@ -23,11 +24,14 @@ done
 
 USER_HOME=$HOME
 HOMEDIR="${USER_HOME}/tabsat/tools/MethylSubpop"
-TARGET="${HOMEDIR}/target.txt"
 OUTDIR="${INDIR}/Output"
 
-echo "Output will be saved in $OUTDIR"
 mkdir -p $OUTDIR
+echo "Output will be saved in $OUTDIR"
+
+# Prepare targetfile
+awk 'NR!=1{$1=++i; print "TNR="$1,"CHR="$2,"START="$3,"END="$4}' OFS='\t' $TARGET_LIST > $OUTIDR/target.txt
+TARGET="${HOMEDIR}/target.txt"
 
 #evaluation of each .sam file: 1) whole targets 2)first & last methylated position in each target
 for file in $INDIR/*.sam

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+<html>
+<head>
+<title>Patternmap</title>
+<style>
+    rect.bar {
+        font: 10px sans-serif;
+        padding: 3px;
+        margin: 1px;
+    }
+    .button {
+        cursor: pointer;
+        }
+    .headerbox {
+        padding-bottom: 5px;
+        border: 1px groove lightgrey;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+    .titlebox {
+        font-family: Dejavu Sans;
+        background-color: lightgrey;
+        font-size: 20px;
+        padding: 10px;
+        border-radius: 3px;
+    }
+</style>
+<script type="text/javascript" src="http://d3js.org/d3.v2.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/exupero/saveSvgAsPng/gh-pages/saveSvgAsPng.js"></script>
+</head>
+<body>
+
+<div id="buttons">
+<br>
+<select class="button" id="targets"></select>
+<select class="button" id="samples"></select>
+
+<br><br>
+
+<input class="button" id="threshold" value="1" min="1" type="number" style="width: 80px;"></input>
+
+<br><br>
+
+<button class="button" id="draw" onclick="removeGraph(); drawGraph(allData)"> Draw Patternmap </button>
+<button class="button" id="compare" onclick="drawGraph(allData)" > Add to compare </button>
+
+<br>
+<button class="button" id="clear" onclick="removeGraph()"> Clear </button>
+
+<br><br>
+</div>
+
+<div id="chart"></div>
+
+
+<script type="text/javascript">
+
+// HERE IS THE JSON
+var all = {
+
+
+// HERE IS THE JSON
+var initial = Object.keys(all)[0]
+var initial_sample = Object.keys(all[initial])[3]
+var allData = new Array();
+var target = initial
+
+allData.push({
+            target : initial,
+            chromosome : all[initial].chrom,
+            position : all[initial].chrom_pos,
+            sample: initial_sample,
+            pattern: all[initial][initial_sample].pattern,
+            realpos : all[initial][initial_sample].realpos
+    });
+
+function DropDown(){    //this function builds the dropdown menue for the targets.
+var alltargets = Object.keys(all)
+
+var dropdown_target = d3.select("#targets")
+    .on("change", function(d) {
+        var target = this.value
+        updateSamples(target)
+        getSelectedTargets(target)
+        })
+    .selectAll("option")
+    .data(alltargets).enter()
+        .append("option")
+        .attr("id", function(d,i){return (i)})
+        .attr("value", function(d){return (d)})
+        .text(function(d) {
+            return d;
+        });
+}
+
+function updateSamples(newData) { //this function updates which samples are present for the selected targets
+    d3.select("#samples").selectAll("option").remove() //removes old entry
+    //if(newData == null){
+    //} else {
+    if(newData != null){
+        var dat = eval(all[ newData ].samples)
+        var dropdown_sample = d3.select("#samples")
+            .on("change", function(d){
+                var s = this.value
+                getSelectedItems(s);
+                })
+            .selectAll("option")
+            .data(dat).enter()
+                .append("option")
+                .attr("id", function(d,i){return (i)})
+                .attr("value", function(d){return (d)})
+                .text(function(d) {
+                    return d;
+                   });
+        }
+    }
+
+function getSelectedTargets(t){
+    target=t;
+    allData = new Array();
+    s = Object.keys(all[target])[3]
+    allData.push({
+            target : target,
+            chromosome : all[target].chrom,
+            position : all[target].chrom_pos,
+            sample: s,
+            pattern: all[target][s].pattern,
+            realpos : all[target][s].realpos
+        });
+    }
+
+function getSelectedItems(s){
+    var t = target;
+    if(s == null){
+    s=initial_sample
+    }
+    allData = new Array();
+    allData.push({
+            target : target,
+            chromosome : all[t].chrom,
+            position : all[t].chrom_pos,
+            sample: s,
+            pattern: all[t][s].pattern,
+            realpos : all[t][s].realpos
+    });
+
+}
+
+DropDown();
+updateSamples(initial);
+
+function removeGraph(){ //removes the svg and the individual save button
+    //d3.selectAll("svg").remove()
+    var el = document.getElementById("chart")
+    while (el.hasChildNodes()) {
+        el.removeChild(el.lastChild)
+        }
+    //d3.selectAll("chart").remove()
+    d3.selectAll("p").remove()
+    //d3.select(document.getElementById("savepng")).remove()
+    }
+
+function drawGraph(dat){ //draws the graph and adds an individual save button
+
+    var threshold = document.getElementById("threshold").value; //get the selected readcount threshold
+    zValues = dat[0].pattern.filter(function(item){ return item[0] >= threshold}) //filters the pattern by readcount threshold
+    var st_id = dat[0].target + "_" + dat[0].sample //unique id including sample and target name
+
+    if (typeof zValues[0] == "undefined"){ //return an alert if there are no patterns left because of the threshold
+        alert("Reads are all less than" + threshold)
+        return;}
+
+    var name = dat[0].sample;
+    var name_length = name.length;
+    var positions = dat[0].realpos;
+    var zwidth = zValues[0].length-1,
+        zheight = zValues.length;
+    var origwidth = zwidth*15;
+        height = zheight*15;
+        margin = {right: 170, top: 200, bottom: 10, left: 10}
+
+    if ((zwidth*15+margin.right) >= name_length*11){
+        var width = zwidth*15;
+    } else {
+        var width = 230
+    }
+
+	var Colors = [
+		["#ff0000"],
+		["#f9ff0c"],
+		["#7f827a"]
+		];
+		legend = [
+		["unmethylated"],
+		["methylated"],
+		["unknown"]
+		];
+
+	var ReadCount = [];
+		for (var i=0; i<zheight; i++){
+		    ReadCount.push(zValues[i][0])
+		    };
+
+	var x = d3.scale.linear()
+		.domain([0, d3.max(ReadCount)])
+		.range([0, 130]);
+
+	function Patternmap(){
+		var Data = patterngrid(zwidth);
+
+        var total = d3.select("#chart").append("div")
+            .attr("id", st_id)
+            .attr("class", "headerbox")
+
+        var title_div = total.append("div")
+            .attr("id", "title")
+            .attr("class", "titlebox")
+            .html(function(){ return name + "<br>" + target})
+
+        var graph_div = total.append("div")
+
+		var grid = graph_div.append("svg")
+		    .attr("width", width + margin.right + margin.left)
+		    .attr("height", margin.top + height + margin.bottom)
+		    .attr("id", st_id + "_svg")
+				.append("g")
+					.attr("id", st_id + "_chart")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var label_group = grid.append("svg:g")
+            .attr("id", "label_group")
+
+        var histogram = grid.append("svg:g")
+            .attr("id", "histo")
+
+        var legend_group = grid.append("svg:g")
+            .attr("id", "legenden")
+
+        var title_group = grid.append("svg:g")
+
+        var savezone = total.append("div")
+            .attr("id", "savepng")
+
+        var save_button = savezone.append("input")
+            .attr("type", "button")
+            .attr("value", "Save as PNG")
+            .attr("class", "button")
+            .on("click", function(){
+                saveSvgAsPng(document.getElementById(st_id + "_svg"), st_id + ".png", {backgroundColor: "#ffffff"});
+	            });
+
+		var row = grid.selectAll(".row")
+		    .data(Data)
+                .enter().append("svg:g")
+                    .attr("class", "row")
+                    .attr("id", "Patternmap");
+
+		var col = row.selectAll(".cell")
+		    .data(function (d) { return d; })
+                .enter().append("svg:rect")
+                    .attr("class", "cell")
+                    .attr("x", function(d) { return d.x; })
+                    .attr("y", function(d) { return d.y; })
+                    .attr("width", function(d) { return d.width; })
+                    .attr("height", function(d) { return d.height; })
+                    .style("fill", function(d) { return Colors[d.value]; })
+                    .style("stroke", '#555')
+
+		var axistext = label_group.selectAll(".chartaxis")
+		    .data(positions)
+		        .enter().append("svg:text")
+		            .attr("y", function(d, i) { return (i * 15)+11; })
+		            .attr("x", 1)
+		            .text(function(d) { return d })
+					.attr("transform", "rotate (-90)")
+		            .style("font-size", "10pt")
+		            .style("font-family", "Consolas, courier");
+
+		var barchart = histogram.selectAll(".barchart")
+		    .data(ReadCount)
+		        .enter().append("svg:rect")
+		            .attr("x", 1)
+		            .attr("y", function(d, i) { return (i * 15)+0.5; })
+		            .attr("transform", "translate(" + (origwidth+2) + ", 0)")
+		            .attr("width", function(d){return x(d);})
+		            .attr("height", 14)
+		            .attr("fill", "lightgrey");
+
+		var barcharttext = histogram.selectAll(".barcharttext")
+		    .data(ReadCount)
+		        .enter().append("svg:text")
+		            .attr("x", 1)
+		            .attr("y", function(d, i) { return i * 15; })
+		            .style("text-anchor", "start")
+		            .text(function(d) { return d})
+		            .attr("transform", function(d) {return "translate(" + (origwidth + x(d) + 5) + "," + 15/1.4 + ")"})
+                    .style("font-size", "10pt")
+		            .style("font-family", "Consolas, courier");
+
+        var barcharttitle = histogram.append("svg:text")
+                .attr("x", 1)
+                .attr("y", -7)
+                .attr("transform", "translate(" + (origwidth+20) +  ", 0)")
+                .text("Readcount")
+                .style("font-weight", "bold")
+                .style("font-size", "12pt")
+                .style("font-family", "Consolas, courier");
+
+		var legende = legend_group.selectAll(".legend")
+		    .data(Colors)
+		        .enter().append("svg:rect")
+		            .attr("x", 1)
+		            .attr("y", function(d, i) { return i * 15})
+		            .attr("transform", "translate(0, -130)")
+		            .attr("width", 13 )
+		            .attr("height", 13)
+		            .attr("fill", function(d, i) { return Colors[i] })
+		            .style("stroke", "black")
+		            .style("stroke-width", "0.5");
+
+		var legendtext = legend_group.selectAll(".legendetext")
+		    .data(legend)
+		        .enter().append("svg:text")
+		            .attr("x", 1)
+		            .attr("y", function(d, i) { return i * 15; })
+		            .text(function (d, i) {return legend[i]})
+		            .attr("transform", "translate(16, -120)")
+                    .style("font-size", "10pt")
+		            .style("font-family", "Consolas, courier");
+
+		var title = title_group.append("svg:text")
+            .attr("x", 1)
+            .attr("y", 1)
+            .text(function(){return name})
+                        .style("font-size", "12pt")
+            .style("font-family", "Verdana, Geneva, sans-serif")
+			.attr("transform","translate(0,-150)")
+			.attr("transform","translate(0,-175)")
+
+        var chrom = title_group.append("svg:text")
+			.attr("x", 1)
+            .attr("y", 1)
+            .text(function(){return target + dat[0].chromosome})
+            .style("font-size", "11pt")
+            .style("font-family", "Verdana, Geneva, sans-serif")
+			.attr("transform","translate(0,-150)")
+	};
+
+	function patterngrid(gridWidth){
+		var data = new Array();
+		var gridItemWidth = 15 ;
+		var gridItemHeight = 15;
+		var startX = 0;
+		var startY = 0;
+		var stepX = gridItemWidth;
+		var stepY = gridItemHeight;
+		var xpos = startX;
+		var ypos = startY;
+
+		for (var index_a = 0; index_a < zheight; index_a++)
+		{
+		    data.push(new Array());
+		    for (var index_b = 0; index_b < zwidth; index_b++)
+		    {
+		        newValue = Math.round(Math.random() * (100 - 1) + 1);
+		        data[index_a].push({
+		                            value: zValues[index_a][index_b+1],
+		                            width: gridItemWidth,
+		                            height: gridItemHeight,
+		                            x: xpos,
+		                            y: ypos,
+		                            patterncount: zValues[index_a][0],
+									position: positions[0][index_b]
+		                        });
+		        xpos += stepX;
+		    }
+		    xpos = startX;
+		    ypos += stepY;
+		}
+		return data;
+		}
+
+	Patternmap()
+}
+
+</script>
+</body>
+</html>

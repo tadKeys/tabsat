@@ -18,6 +18,7 @@ INTERSECT_BED="${BEDTOOLS_BASE}/intersectBed"
 GENOMECOVERAGE="${BEDTOOLS_BASE}/genomeCoverageBed"
 SORTBED="${BEDTOOLS_BASE}/sortBed"
 TARGET_LIST_CHECKER="${BASE_DIR}/tools/ait/check_target_list.py"
+PATTERNMAP="${BASE_DIR}/tools/Patternmap/patternmap.sh"
 
 
 usage () {
@@ -428,17 +429,18 @@ done
 
 
 ############## Find methyl subpopulations
-echo -e "\n- CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}"
-bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET}
+echo -e "\n- CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET} -t ${TARGET_LIST}"
+bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET} -t ${TARGET_LIST}
 
+############## Create Patternmap
 
+echo -e "\n- CMD patternmap: ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${INPUTDIR} -t ${TARGET_LIST}"
+bash ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${INPUTDIR} -t ${TARGET_LIST}
 
 ############## Copy the plots
 echo "-- Copying the plots"
 mkdir plots
 cp ${COV_DIR}/PLOTS/* plots/
-
-
 
 ##############  Build quality summary
 ${BUILD_QUALITY_SUMMARY_SCRIPT} ${OUTPUT_DIR}/quality
@@ -478,4 +480,5 @@ echo -e "##########################################"
 echo -e "##  Thank you for using TABSAT!         ##"
 echo -e "##  github.com/tadKeys/tabsat           ##"
 echo -e "##########################################\n"
+
 
