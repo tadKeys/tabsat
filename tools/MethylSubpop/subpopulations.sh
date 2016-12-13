@@ -30,8 +30,8 @@ mkdir -p $OUTDIR
 echo "Output will be saved in $OUTDIR"
 
 # Prepare targetfile
-awk 'NR!=1{$1=++i; print "TNR="$1,"CHR="$2,"START="$3,"END="$4}' OFS='\t' $TARGET_LIST > $OUTIDR/target.txt
-TARGET="${HOMEDIR}/target.txt"
+awk 'NR!=1{$1=++i; print "TNR="$1,"CHR="$2,"START="$3,"END="$4}' OFS='\t' $TARGET_LIST > $OUTDIR/target.txt
+TARGET="${OUTDIR}/target.txt"
 
 #evaluation of each .sam file: 1) whole targets 2)first & last methylated position in each target
 for file in $INDIR/*.sam
