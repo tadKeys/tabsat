@@ -1,4 +1,4 @@
-__author__ = 'Stephan'
+#!/usr/bin/env python2
 
 import os
 import glob

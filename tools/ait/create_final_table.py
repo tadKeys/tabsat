@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 import csv
 import glob
 import re
@@ -243,8 +243,9 @@ def prefill_strand_information_buffer(strand_information_buffer, cov_file, all_c
 
 def perform_grep_with_cur_key(cur_key, all_cpg_file_path):
     
-    print "Perform grep with cur key"
-    print " ".join(["grep", cur_key, all_cpg_file_path])
+    ## DEBUG
+    #print "Perform grep with cur key"
+    #print " ".join(["grep", cur_key, all_cpg_file_path])
     
     return subprocess.check_output(["grep", cur_key, all_cpg_file_path])
 

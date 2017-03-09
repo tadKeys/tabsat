@@ -1,10 +1,11 @@
 #!/bin/bash
 
-TABSAT_VERSION="1.0.1"
+TABSAT_VERSION="1.0.2"
 USER_HOME=$HOME
 BASE_DIR="${USER_HOME}/tabsat"
 BEDTOOLS_BASE="${BASE_DIR}/tools/bedtools/bedtools2/bin"
 FINAL_TABLE_SCRIPT="${BASE_DIR}/tools/ait/create_final_table.py"
+CHECK_PYTHON_VERSION_SCRIPT="${BASE_DIR}/tools/ait/check_python_version.py"
 FINAL_BED_SCRIPT="${BASE_DIR}/tools/ait/convert_final_table_to_bed.py"
 CHECK_QUALITY_SCRIPT="${BASE_DIR}/tools/ait/check_quality.sh"
 BUILD_QUALITY_SUMMARY_SCRIPT="${BASE_DIR}/tools/ait/build_quality_summary.sh"
@@ -64,6 +65,16 @@ echo -e "##  github.com/tadKeys/tabsat  ##"
 echo -e "#################################\n"
 
 
+## Check and set python version
+${CHECK_PYTHON_VERSION_SCRIPT}
+check_return_code=$?
+
+#echo ${check_return_code}
+if [[ ${check_return_code} != 0 ]]
+then
+    echo "Python 2.7 is needed"
+    exit 1
+fi
 
 
 if [[ $BS_SEQ != "DIR" && $BS_SEQ != "NONDIR" ]]; then
@@ -174,7 +185,7 @@ fi
 
 
 ############# Checking the target list
-python ${TARGET_LIST_CHECKER} ${TARGET_LIST}
+${TARGET_LIST_CHECKER} ${TARGET_LIST}
 check_return_code=$?
 
 #echo ${check_return_code}
@@ -186,7 +197,7 @@ fi
 
 
 
-############# Create directory for final table and R plots
+############# Create list of input files
 if [ -p $INPUTDIR ]
 then
 	FILEARRAY="$@"
@@ -377,7 +388,7 @@ done
 ############## Combine idxstats
 echo "-- Combinind idxstats"
     IDX_DIR="${OUTPUT_DIR}/idxstats"
-    python ${FINAL_COMBINE_IDXSTATS_SCRIPT} ${IDX_DIR} "${IDX_DIR}/coverage_summary.csv"
+    ${FINAL_COMBINE_IDXSTATS_SCRIPT} ${IDX_DIR} "${IDX_DIR}/coverage_summary.csv"
 echo "-- .. done with combining idxstats"
 
 
@@ -399,7 +410,7 @@ echo -e "\n-- Creating final table.."
     fi
 
     echo "${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${ALIGNER} ${ALL_CPGS_FILE} ${READ_CUTOFF}"
-    python ${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${ALIGNER} ${ALL_CPGS_FILE} ${READ_CUTOFF}
+    ${FINAL_TABLE_SCRIPT} ${TARGET_LIST} ${COV_DIR} ${ALIGNER} ${ALL_CPGS_FILE} ${READ_CUTOFF}
 echo "-- ... done with table creation."
 
 ## Link the final table
@@ -409,7 +420,7 @@ ln -s ${COV_DIR}/${FINAL_TABLE}
 ## Produce the BED file
 echo -e "\n-- Creating final bed ..."
 FINAL_BED="ResultMethylListOnlyReferenceCpGs.bed"
-python ${FINAL_BED_SCRIPT} ${FINAL_TABLE} ${FINAL_BED}
+${FINAL_BED_SCRIPT} ${FINAL_TABLE} ${FINAL_BED}
 echo "-- .. done with bed creation."
 
 
@@ -432,10 +443,20 @@ done
 echo -e "\n- CMD subpopulations: ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET} -t ${TARGET_LIST}"
 bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET} -t ${TARGET_LIST}
 
-############## Create Patternmap
 
-echo -e "\n- CMD patternmap: ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${INPUTDIR} -t ${TARGET_LIST}"
-bash ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${INPUTDIR} -t ${TARGET_LIST}
+############## Create Patternmap
+## Check if input is list -> copy to output folder
+PATTERNMAP_INPUT_DIR="${INPUTDIR}"
+if [ -p $INPUTDIR ]
+then
+    mkdir -p ${OUTPUT_DIR}/copied_inputs
+    mv "$FILEARRAY" "${OUTPUT_DIR}/copied_inputs"
+    PATTERNMAP_INPUT_DIR="${OUTPUT_DIR}/copied_inputs"
+fi
+
+echo -e "\n- CMD patternmap: ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST}"
+bash ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST}
+
 
 ############## Copy the plots
 echo "-- Copying the plots"
@@ -444,7 +465,7 @@ cp ${COV_DIR}/PLOTS/* plots/
 
 ##############  Build quality summary
 ${BUILD_QUALITY_SUMMARY_SCRIPT} ${OUTPUT_DIR}/quality
-python ${SUMMARIZE_OFF_TARGET_REGIONS} "${OUTPUT_DIR}/quality" "${OUTPUT_DIR}/quality/01_summary_off_targets.csv"
+${SUMMARIZE_OFF_TARGET_REGIONS} "${OUTPUT_DIR}/quality" "${OUTPUT_DIR}/quality/01_summary_off_targets.csv"
 
 
 ############## Convert all plots to pngs
@@ -468,7 +489,7 @@ chmod a+r -R qc
 ############## Create final JSON file
 echo "Creating final JSON file"
 echo "${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats cph ${FINAL_BED}"
-python ${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats cph ${FINAL_BED}
+${JSON_CREATOR} ${FINAL_TABLE} plots subpopulations qc idxstats cph ${FINAL_BED}
 
 
 

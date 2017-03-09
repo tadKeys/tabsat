@@ -26,21 +26,27 @@ BASE_DIR="${USER_HOME}/tabsat"
 OUTDIR="${INDIR}/Patternmap"
 SAMPLE_C="${INDIR}/COVERAGE_NONDIR_tmap/MethylSubpopulations/Output/SampleComparision.txt"
 
+echo "INDIR: ${INDIR}"
+echo "OUTDIR: ${OUTDIR}"
 
-#/home/julie/tabsat/ultimate_test/COVERAGE_NONDIR_tmap/MethylSubpopulations/Output
-
+## Create output dir
 mkdir -p $OUTDIR
 
+## CD into output directory
 cd $OUTDIR
-cp $SAMPLE_C $OUTDIR/All_targets.txt
-#cp ${INDIR}/subpopulations/SampleComparision.txt ${OUTDIR}/All_targets.txt
 
+## Copy the positions file
+echo "cp $SAMPLE_C $OUTDIR/All_targets.txt"
+cp $SAMPLE_C $OUTDIR/All_targets.txt
+
+## Get the input files
 ls ${SAMPLEDIR}/*fastq | awk -F/ '{print $NF}' > sample.list
+
 
 sed -i ' s/Z/1/g; s/z/0/g ' All_targets.txt  #ALLE zZ werden geändert
 sample_count=$(wc -l < sample.list)
 
-#create target lists
+## Create target lists
 while read line; do
 	if [[ $line == Target* ]]; then
 		target=$(echo $line | cut -d ";" -f 1 | sed s/" "/"_"/g)
@@ -50,7 +56,7 @@ while read line; do
 	fi
 done < All_targets.txt
 
-#delete targets with no patterns and create sample specific target files
+## Delete targets with no patterns and create sample specific target files
 a=1
 for i in *target; do
 	a=$(($a+1))
