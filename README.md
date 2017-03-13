@@ -58,11 +58,11 @@ Test data is available [here](test_data)
      * NCBI: ftp://ftp.ncbi.nlm.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37.p13/seqs_for_alignment_pipelines/GCA_000001405.14_GRCh37.p13_no_alt_analysis_set.fna.gz
  * Mouse
     * USCS: http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.2bit
-* Put it into the correct folder
- * Human
- ```tabsat/reference/human/hg19/hg19.fasta```
- * Mouse
- ```tabsat/reference/mouse/mm10/mm10.fasta```
+* Put the reference genome file into the correct folder
+ * Human<br/>
+ tabsat/reference/human/hg19/hg19.fasta
+ * Mouse<br/>
+ tabsat/reference/mouse/mm10/mm10.fasta
 * Prepare the reference genome
 ```sh
 $ tabsat/reference/prepareReference.sh
