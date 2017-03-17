@@ -74,11 +74,11 @@ apt-get install p7zip-full
 7za e tabsat/tools/ait/all_cpgs_only_pos_mm10.7z
 ```
 * Install Perl modules
- * Cairo.pm
- * Switch.pm
+  * Cairo.pm
+  * Switch.pm
 * Compile bedtools
- * Go to folder 'tools/bedtools/bedtools2'
- * Run 'make'
+  * Go to folder 'tools/bedtools/bedtools2'
+  * Run 'make'
 
 ## Run example
 
