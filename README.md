@@ -59,10 +59,10 @@ Test data is available [here](test_data)
  * Mouse
     * USCS: http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.2bit
 * Put the reference genome file into the correct folder
- * Human<br/>
- tabsat/reference/human/hg19/hg19.fasta
- * Mouse<br/>
- tabsat/reference/mouse/mm10/mm10.fasta
+  * Human<br/>
+  tabsat/reference/human/hg19/hg19.fasta
+  * Mouse<br/>
+  tabsat/reference/mouse/mm10/mm10.fasta
 * Prepare the reference genome
 ```sh
 $ tabsat/reference/prepareReference.sh
@@ -79,7 +79,8 @@ apt-get install p7zip-full
 * Compile bedtools
   * Go to folder 'tools/bedtools/bedtools2'
   * Run 'make'
-
+* Run 'install' script in tabsat folder
+```install```
 ## Run example
 
 #### Command line

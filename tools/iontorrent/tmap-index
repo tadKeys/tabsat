@@ -3,8 +3,7 @@
 #
 # Helper script to call tmap index
 #
-USER_HOME=$HOME
-BASE_DIR="${USER_HOME}/tabsat"
+BASE_DIR=`readlink -f ./tabsat`
 TOOLS="${BASE_DIR}/tools"
 
 ${TOOLS}/iontorrent/tmap index "$@"

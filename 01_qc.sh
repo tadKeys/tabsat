@@ -1,7 +1,10 @@
 #!/bin/bash
 
-USER_HOME=$HOME
-BASE_DIR="${USER_HOME}/tabsat"
+TMP_CUR_DIR=`dirname $0`
+TMP_TABSAT_SCRIPT="$TMP_CUR_DIR/tabsat"
+TMP_ABS_TABSAT_SCRIPT=`readlink -f $TMP_TABSAT_SCRIPT`
+BASE_DIR=`dirname $TMP_ABS_TABSAT_SCRIPT`
+
 PRINSEQLITE="${BASE_DIR}/tools/prinseq-lite-0.20.4/prinseq-lite.pl"
 PRINSEQGRAPHS="${BASE_DIR}/tools/prinseq-lite-0.20.4/prinseq-graphs-noPCA.pl"
 

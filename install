@@ -1,0 +1,10 @@
+#!/bin/bash
+
+## Install samtools
+cd tools/samtools
+tar xvfj samtools-1.4.tar.bz2
+cd samtools-1.4
+./configure
+make
+
+## 

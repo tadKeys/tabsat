@@ -1,9 +1,11 @@
 #!/bin/bash
 
-USER_HOME=$HOME
-BASE_DIR="${USER_HOME}/tabsat"
-BEDTOOLS_BASE="${BASE_DIR}/tools/bedtools/bedtools2/bin"
+TMP_CUR_DIR=`dirname $0`
+TMP_TABSAT_SCRIPT="$TMP_CUR_DIR/../../tabsat"
+TMP_ABS_TABSAT_SCRIPT=`readlink -f $TMP_TABSAT_SCRIPT`
+BASE_DIR=`dirname $TMP_ABS_TABSAT_SCRIPT`
 
+BEDTOOLS_BASE="${BASE_DIR}/tools/bedtools/bedtools2/bin"
 BAMTOBED="${BEDTOOLS_BASE}/bamToBed"
 SORTBED="${BEDTOOLS_BASE}/sortBed"
 INTERSECTBED="${BEDTOOLS_BASE}/intersectBed"

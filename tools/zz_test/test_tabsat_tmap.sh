@@ -2,10 +2,12 @@
 
 echo -e "\nRunning Tabsat test \n"
 
-USER_HOME=$HOME
-BASE_DIR="${USER_HOME}/tabsat"
-TABSAT="${BASE_DIR}/tabsat"
+TMP_CUR_DIR=`dirname $0`
+TMP_TABSAT_SCRIPT="$TMP_CUR_DIR/../../tabsat"
+TMP_ABS_TABSAT_SCRIPT=`readlink -f $TMP_TABSAT_SCRIPT`
+BASE_DIR=`dirname $TMP_ABS_TABSAT_SCRIPT`
 
+TABSAT="${BASE_DIR}/tabsat"
 TEST_DIR="${BASE_DIR}/tools/zz_test"
 TARGET_FILE="${TEST_DIR}/target_list_tmap.csv"
 TEST_OUTPUT="${BASE_DIR}/tabsat_test_output_tmap"

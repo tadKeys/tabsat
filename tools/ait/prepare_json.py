@@ -159,7 +159,7 @@ def create_zip_of_output(plot_directory, subpopulation_directory, cph_directory,
     ## Final subpop file
     final_subpops = glob.glob(os.path.join(subpopulation_directory, "*FinalSubpop.txt"))
     ## Final sample comparison
-    sample_comp_subpops = glob.glob(os.path.join(subpopulation_directory, "*SampleComparision*"))
+    sample_comp_subpops = glob.glob(os.path.join(subpopulation_directory, "*SampleComparison*"))
     ## QC files
     qc_files = glob.glob(os.path.join(qc_directory, "*html"))
     ## CPH files

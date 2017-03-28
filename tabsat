@@ -1,8 +1,12 @@
 #!/bin/bash
 
 TABSAT_VERSION="1.0.2"
-USER_HOME=$HOME
-BASE_DIR="${USER_HOME}/tabsat"
+
+TMP_CUR_DIR=`dirname $0`
+TMP_TABSAT_SCRIPT="$TMP_CUR_DIR/tabsat"
+TMP_ABS_TABSAT_SCRIPT=`readlink -f $TMP_TABSAT_SCRIPT`
+BASE_DIR=`dirname $TMP_ABS_TABSAT_SCRIPT`
+
 BEDTOOLS_BASE="${BASE_DIR}/tools/bedtools/bedtools2/bin"
 FINAL_TABLE_SCRIPT="${BASE_DIR}/tools/ait/create_final_table.py"
 CHECK_PYTHON_VERSION_SCRIPT="${BASE_DIR}/tools/ait/check_python_version.py"
@@ -20,6 +24,7 @@ GENOMECOVERAGE="${BEDTOOLS_BASE}/genomeCoverageBed"
 SORTBED="${BEDTOOLS_BASE}/sortBed"
 TARGET_LIST_CHECKER="${BASE_DIR}/tools/ait/check_target_list.py"
 PATTERNMAP="${BASE_DIR}/tools/Patternmap/patternmap.sh"
+SAMTOOLS="${BASE_DIR}/tools/samtools/samtools-1.4/samtools"
 
 
 usage () {
@@ -230,17 +235,17 @@ mkdir -p $POP_DIR
 cd ${OUTPUT_DIR}
 
 ## Create qc dir
-mkdir qc
+mkdir -p qc
 
 ## Create idxstats dir
-mkdir idxstats
+mkdir -p idxstats
 
 ## Create dir cph
-mkdir cph
+mkdir -p cph
 
 ## Create directory for qualities
 echo "-- Creating quality directory"
-mkdir quality
+mkdir -p quality
 
 echo -e "\n"
 
@@ -317,14 +322,14 @@ do
     echo ""
 
     ## Convert SAM to BAM
-    echo "samtools view -S -b -h ${current_sam} > ${current_sam}_removed_cov_one.bam"
-    samtools view -S -b -h ${current_sam} > "${current_sam}_removed_cov_one.bam"
+    echo "${SAMTOOLS} view -S -b -h ${current_sam} > ${current_sam}_removed_cov_one.bam"
+    ${SAMTOOLS} view -S -b -h ${current_sam} > "${current_sam}_removed_cov_one.bam"
 
     echo ""
 
     ## Sort BAM file
-    echo "samtools sort ${current_sam}_removed_cov_one.bam ${current_sam}_removed_cov_one_sorted"
-    samtools sort "${current_sam}_removed_cov_one.bam" "${current_sam}_removed_cov_one_sorted"
+    echo "${SAMTOOLS} sort ${current_sam}_removed_cov_one.bam -o ${current_sam}_removed_cov_one_sorted.bam"
+    ${SAMTOOLS} sort "${current_sam}_removed_cov_one.bam" -o "${current_sam}_removed_cov_one_sorted.bam"
 
     echo ""
 
@@ -341,8 +346,8 @@ do
     echo ""
 
     ## Convert BAM to SAM
-    echo "samtools view -h ${current_sam}_removed_one_final.bam > ${current_sam}_removed_one_final.sam"
-    samtools view -h "${current_sam}_removed_one_final.bam" > "${current_sam}_removed_one_final.sam"
+    echo "${SAMTOOLS} view -h ${current_sam}_removed_one_final.bam > ${current_sam}_removed_one_final.sam"
+    ${SAMTOOLS} view -h "${current_sam}_removed_one_final.bam" > "${current_sam}_removed_one_final.sam"
 
     
     echo ""
@@ -359,16 +364,16 @@ do
     current_bam="${current_dir}/${current}.bam"
 
 
-    echo "samtools view -S -b ${current_sam} > ${current_bam}"
-    samtools view -S -b ${current_sam} > ${current_bam}
+    echo "${SAMTOOLS} view -S -b ${current_sam} > ${current_bam}"
+    ${SAMTOOLS} view -S -b ${current_sam} > ${current_bam}
 
-    echo "samtools sort ${current_bam} ${current_bam}.sorted"
-    samtools sort ${current_bam} ${current_bam}.sorted
+    echo "${SAMTOOLS} sort ${current_bam} ${current_bam}.sorted.bam"
+    ${SAMTOOLS} sort ${current_bam} -o ${current_bam}.sorted.bam
 
-    echo "samtools index ${current_bam}.sorted.bam"
-    samtools index ${current_bam}.sorted.bam
+    echo "${SAMTOOLS} index ${current_bam}.sorted.bam"
+    ${SAMTOOLS} index ${current_bam}.sorted.bam
 
-    samtools idxstats "${current_bam}.sorted.bam" > "${current_dir}/${current}.idxstats"
+    ${SAMTOOLS} idxstats "${current_bam}.sorted.bam" > "${current_dir}/${current}.idxstats"
     cp "${current_dir}/${current}.idxstats" "idxstats"
 
     ## Copy the CpH files
@@ -445,17 +450,19 @@ bash ${METHYL_SUBPOP} -i ${POP_DIR} -p ${PERCENT_TARGET} -t ${TARGET_LIST}
 
 
 ############## Create Patternmap
+echo "-- Creating patternmap"
 ## Check if input is list -> copy to output folder
 PATTERNMAP_INPUT_DIR="${INPUTDIR}"
 if [ -p $INPUTDIR ]
 then
     mkdir -p ${OUTPUT_DIR}/copied_inputs
-    mv "$FILEARRAY" "${OUTPUT_DIR}/copied_inputs"
+    echo "copy command: cp $FILEARRAY \"${OUTPUT_DIR}/copied_inputs\""
+    cp $FILEARRAY "${OUTPUT_DIR}/copied_inputs"
     PATTERNMAP_INPUT_DIR="${OUTPUT_DIR}/copied_inputs"
 fi
 
-echo -e "\n- CMD patternmap: ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST}"
-bash ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST}
+echo -e "\n- CMD patternmap: ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST} -a ${ALIGNER}"
+bash ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST} -a ${ALIGNER}
 
 
 ############## Copy the plots
@@ -469,6 +476,7 @@ ${SUMMARIZE_OFF_TARGET_REGIONS} "${OUTPUT_DIR}/quality" "${OUTPUT_DIR}/quality/0
 
 
 ############## Convert all plots to pngs
+echo "-- Converting all plots to pngs"
 cd plots
 for file in `ls *.pdf`
 do

@@ -1,30 +1,34 @@
 #!/bin/bash
 
 usage () {
-    echo "usage: $0 -i <path to SampleComparision.txt> -s <sample directory>"
+    echo "usage: $0 -i <path to SampleComparison.txt> -s <sample directory>"
 }
 
-echo -e "\nPreparing SampleComparision for Patternmap"
+echo -e "\nPreparing SampleComparison for Patternmap"
 
 #Filerting of parameters
-while getopts "hi:s:t:" option; do
+while getopts "hi:s:t:a:" option; do
     case "$option" in
 	h) usage
 	   exit 0 ;;
 	i) INDIR=${OPTARG} ;;
 	s) SAMPLEDIR=${OPTARG} ;;
 	t) TARGET_LIST=${OPTARG} ;;
+	a) ALIGNER=${OPTARG} ;;
 	?) echo "Error: unknown option $OPTARG"
 	   usage
 	   exit 1;;
     esac
 done
 
-USER_HOME=$HOME
-HOMEDIR="${USER_HOME}/tabsat/tools/Patternmap"
-BASE_DIR="${USER_HOME}/tabsat"
+TMP_CUR_DIR=`dirname $0`
+TMP_TABSAT_SCRIPT="$TMP_CUR_DIR/../../tabsat"
+TMP_ABS_TABSAT_SCRIPT=`readlink -f $TMP_TABSAT_SCRIPT`
+BASE_DIR=`dirname $TMP_ABS_TABSAT_SCRIPT`
+
+HOMEDIR="${BASE_DIR}/tools/Patternmap"
 OUTDIR="${INDIR}/Patternmap"
-SAMPLE_C="${INDIR}/COVERAGE_NONDIR_tmap/MethylSubpopulations/Output/SampleComparision.txt"
+SAMPLE_C="${INDIR}/COVERAGE_NONDIR_${ALIGNER}/MethylSubpopulations/Output/SampleComparison.txt"
 
 echo "INDIR: ${INDIR}"
 echo "OUTDIR: ${OUTDIR}"
@@ -47,6 +51,7 @@ sed -i ' s/Z/1/g; s/z/0/g ' All_targets.txt  #ALLE zZ werden geändert
 sample_count=$(wc -l < sample.list)
 
 ## Create target lists
+echo "---- Crete target lists in patternmap"
 while read line; do
 	if [[ $line == Target* ]]; then
 		target=$(echo $line | cut -d ";" -f 1 | sed s/" "/"_"/g)
@@ -135,7 +140,7 @@ for file in *.target; do
 		}
 	}' $file.trshld.target > $file.transponse.target
 
-############ Positionen entfernt #########################
+############ Deleted positions #########################
 
 	sed -i 's/ /,/g' $file.transponse.target
 	i=1	
@@ -155,7 +160,7 @@ for file in *.target; do
 	AKT_TRGT=$(echo "$file" | cut -f 2 -d ".")
 	AKT_SAMPLE=$(echo "$file" | cut -f 1 -d ".")	
 	
-########## gesamt JSON #############
+########## Whole JSON #############
 
 	echo ", \"${AKT_SAMPLE}\":{\"pattern\":[" >> ${AKT_TRGT}.json
 	more $file.json >> ${AKT_TRGT}.json
@@ -163,6 +168,9 @@ for file in *.target; do
 	more pos.log >> ${AKT_TRGT}.json
 	rm $file.json
 done
+
+echo "Removing"
+pwd
 
 rm *.log
 rm *.target

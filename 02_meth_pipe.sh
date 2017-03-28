@@ -1,7 +1,10 @@
 #!/bin/bash
 
-USER_HOME=$HOME
-BASE_DIR="${USER_HOME}/tabsat"
+TMP_CUR_DIR=`dirname $0`
+TMP_TABSAT_SCRIPT="$TMP_CUR_DIR/tabsat"
+TMP_ABS_TABSAT_SCRIPT=`readlink -f $TMP_TABSAT_SCRIPT`
+BASE_DIR=`dirname $TMP_ABS_TABSAT_SCRIPT`
+
 TOOLS="${BASE_DIR}/tools"
 
 PRINSEQLITE="${TOOLS}/prinseq-lite-0.20.4/prinseq-lite.pl"
@@ -23,7 +26,7 @@ export PATH="${TOOLS}/bowtie2/bowtie2-2.2.4/:$PATH"
 
 echo -e "\n- Starting 02_meth_pipe.sh\n"
 
-echo $@
+echo "- $@"
 
 if [ -n "$1" ];
 then
@@ -212,7 +215,6 @@ if [ $param_seq_library == "PE" ]
 then
     ${QC_MODULE} ${file_pe} ${outputfolder}
 fi
-
 
 
 
