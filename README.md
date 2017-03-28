@@ -80,7 +80,7 @@ apt-get install p7zip-full
   * Go to folder 'tools/bedtools/bedtools2'
   * Run 'make'
 * Run 'install' script in tabsat folder
-```install```
+```./install```
 ## Run example
 
 #### Command line
