@@ -12,6 +12,7 @@ INTERSECTBED="${BEDTOOLS_BASE}/intersectBed"
 COVERAGEBED="${BEDTOOLS_BASE}/coverageBed"
 GENOMECOVERAGE="${BEDTOOLS_BASE}/genomeCoverageBed"
 MERGEBED="${BEDTOOLS_BASE}/mergeBed"
+SAMTOOLS="${BASE_DIR}/tools/samtools/samtools-1.4/samtools"
 
 ## INPUTS
 QUALITY_DIR=$1
@@ -62,10 +63,10 @@ NON_INTERSECT_COV_MERGED_BED="${QUALITY_DIR}/${BAM_FILE_BASENAME_WO_SUFFIX}.non_
 INTERSECT_COV_MERGED_BED="${QUALITY_DIR}/${BAM_FILE_BASENAME_WO_SUFFIX}.intersect_cov_merged.bed"
 
 ## Create an off-target BAM file
-samtools sort -o ${BAM_FILE} aa | ${INTERSECTBED} -v -a - -b ${QUALITY_DIR}/target_list.bed > ${NON_INTERSECT_BAM}
+${SAMTOOLS} sort ${BAM_FILE} | ${INTERSECTBED} -v -a - -b ${QUALITY_DIR}/target_list.bed > ${NON_INTERSECT_BAM}
 
 ## Create an on-target BAM file
-samtools sort -o ${BAM_FILE} aa | ${INTERSECTBED} -a - -b ${QUALITY_DIR}/target_list.bed > ${INTERSECT_BAM}
+${SAMTOOLS} sort ${BAM_FILE} | ${INTERSECTBED} -a - -b ${QUALITY_DIR}/target_list.bed > ${INTERSECT_BAM}
 
 
 
@@ -83,10 +84,11 @@ echo ${NON_INTERSECT_COV_BED}
 
 if [[ $(cat ${NON_INTERSECT_COV_BED} | awk '$4 > 50') ]];
 then
-    echo "lines in no-intersect cov_bed"
+    echo "- Lines in no-intersect cov_bed:"
     cat ${NON_INTERSECT_COV_BED} | awk '$4 > 50' | ${MERGEBED} -i - -c 4 -o mean > ${NON_INTERSECT_COV_MERGED_BED}
+    wc -l ${NON_INTERSECT_COV_MERGED_BED}
 else
-    echo "empty no-intersect cov_bed"
+    echo "- Empty no-intersect cov_bed:"
     touch ${NON_INTERSECT_COV_MERGED_BED}
 fi
 
@@ -95,10 +97,11 @@ fi
 ## Merge on-target coverage file and limit to regions with coverage greater than 0
 if [[ $(cat ${INTERSECT_COV_BED} | awk '$4 > 50') ]]; 
 then 
-    echo "lines in intersect cov_bed"
+    echo "- Lines in intersect cov_bed"
     cat ${INTERSECT_COV_BED} | awk '$4 > 50' | ${MERGEBED} -i - -c 4 -o mean > ${INTERSECT_COV_MERGED_BED}
+    wc -l ${INTERSECT_COV_MERGED_BED}
 else
-    echo "empty intersect cov_bed"
+    echo "- Empty intersect cov_bed"
     touch ${INTERSECT_COV_MERGED_BED}
 fi
 
@@ -107,10 +110,10 @@ fi
 SUMMARY_FILE="${QUALITY_DIR}/${BAM_FILE_BASENAME_WO_SUFFIX}.summary.txt"
 rm -f ${SUMMARY_FILE}
 
-summary_num_reads_target=`samtools view ${INTERSECT_BAM} | wc -l`
+summary_num_reads_target=`${SAMTOOLS} view ${INTERSECT_BAM} | wc -l`
 echo "Number of reads on target: ${summary_num_reads_target}" >> ${SUMMARY_FILE}
 
-summary_num_reads_off_target=`samtools view ${NON_INTERSECT_BAM} | wc -l`
+summary_num_reads_off_target=`${SAMTOOLS} view ${NON_INTERSECT_BAM} | wc -l`
 echo "Number of reads off target: ${summary_num_reads_off_target}" >> ${SUMMARY_FILE}
 
 summary_num_off_target=`cat ${NON_INTERSECT_COV_MERGED_BED} | wc -l`

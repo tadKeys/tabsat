@@ -169,7 +169,7 @@ for file in *.target; do
 	rm $file.json
 done
 
-echo "Removing"
+echo "- Patternmap: removing *.log, *.target, *.jsons"
 pwd
 
 rm *.log

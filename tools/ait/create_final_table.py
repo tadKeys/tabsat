@@ -734,7 +734,7 @@ def check_target_list(target_list):
                 checked_header = True
                 
 
-    print "- target list is ok"
+    print "- Target list is ok"
 
     return "ok"
 

@@ -76,10 +76,7 @@ apt-get install p7zip-full
 * Install Perl modules
   * Cairo.pm
   * Switch.pm
-* Compile bedtools
-  * Go to folder 'tools/bedtools/bedtools2'
-  * Run 'make'
-* Run 'install' script in tabsat folder
+* Run 'install' script in tabsat folder (installs SAMtools, Bedtools)
 ```./install```
 ## Run example
 
