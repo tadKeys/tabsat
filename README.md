@@ -21,7 +21,7 @@ http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0160227
 ```sh
 ${TABSAT} -l NONDIR -g hg19 -q 20 -m 10 -p 0.8 -r 0 -t target.csv -a tmap -o output_dir input.fastq
 ```
-**-t** Targetlist in CSV format [example](https://github.com/tadKeys/tabsat/blob/master/tools/zz_test/target_list.csv) [mandatory] - Strand can be "+", "-", "+/-"<br />
+**-t** Targetlist in CSV format [example](https://github.com/tadKeys/tabsat/blob/master/tools/zz_test/target_list_tmap.csv) [mandatory] - Strand can be "+", "-", "+/-"<br />
 **-e** Sequencing library - SE/PE (PE reads must be called \*_1.fastq, \*_2.fastq)<br />
 **-g** Genome (hg19, mm10)<br />
 **-l** Library mode of bisulfite experiment<br />
