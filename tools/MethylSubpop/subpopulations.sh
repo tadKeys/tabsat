@@ -22,8 +22,13 @@ while getopts "hi:p:t:" option; do
     esac
 done
 
-USER_HOME=$HOME
-HOMEDIR="${USER_HOME}/tabsat/tools/MethylSubpop"
+
+TMP_CUR_DIR=`dirname $0`
+TMP_TABSAT_SCRIPT="$TMP_CUR_DIR/../../tabsat"
+TMP_ABS_TABSAT_SCRIPT=`readlink -f $TMP_TABSAT_SCRIPT`
+BASE_DIR=`dirname $TMP_ABS_TABSAT_SCRIPT`
+
+HOMEDIR="${BASE_DIR}/tools/MethylSubpop"
 OUTDIR="${INDIR}/Output"
 
 mkdir -p $OUTDIR
