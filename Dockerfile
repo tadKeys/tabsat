@@ -60,14 +60,14 @@ RUN curl -SL ftp://ftp.ncbi.nlm.nih.gov/genbank/genomes/Eukaryotes/vertebrates_m
 
 ## Prepare the reference
 ##
-RUN ln -s /root/tabsat/reference/human/hg19/ucsc.hg19.fasta /root/tabsat/reference/human/hg19/bismark_tmap/hg19.fasta
+RUN ln -s tabsat/reference/human/hg19/ucsc.hg19.fasta tabsat/reference/human/hg19/bismark_tmap/hg19.fasta
 RUN sh ./tabsat/reference/prepareReference.sh
 
 
 ## Prepare the CpG file
 ## 
-RUN 7z e -otabsat/tools/ait/ tabsat/tools/ait/all_cpgs_only_pos_hg19.7z
-RUN 7z e -otabsat/tools/ait/ tabsat/tools/ait/all_cpgs_only_pos_mm10.7z
+RUN 7z e -o tabsat/tools/ait/ tabsat/tools/ait/all_cpgs_only_pos_hg19.7z
+RUN 7z e -o tabsat/tools/ait/ tabsat/tools/ait/all_cpgs_only_pos_mm10.7z
 
 
 ## Configure the supervisor
