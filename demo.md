@@ -1,12 +1,14 @@
 # TABSAT - demo - try the software
 
+**Unfortunately the Platomics demo server is currently not running. We recommend to install the standalone version of TABSAT.**
+
 ### URL
-http://demo.platomics.com
+http://demo.platomics.com (currenlty not running)
 
 ### Credentials
 Log-in with</br>
-**user**: tabsat@platomics.com</br>
-**password**: demo456</br>
+**user**: tabsat@platomics.com  (currenlty not running)</br>
+**password**: demo456  (currenlty not running)</br>
 
 ### Steps
 * Download the demo data:
