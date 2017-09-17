@@ -9,8 +9,10 @@ It performs
 
 Available as
 * Fully configured Docker image [Dockerfile](Dockerfile) - see usage information below.
-* [Platomics](www.platomics.com) app - see [demo](demo.md)
 * Source code
+
+## Collaboration
+Please contact us if you need help running your analyses
 
 ## Publication
 TABSAT is published:<br/>
@@ -87,9 +89,6 @@ apt-get install p7zip-full
 ./test_tabsat.sh
 ```
 * Inspect output at *tabsat/tabsat_test_output*
-
-#### Platomics
-Please see the instructions: [demo](demo.md)
 
 
 #### Docker
