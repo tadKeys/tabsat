@@ -12,7 +12,15 @@ Available as
 * Source code
 
 ## Collaboration
-Please contact us if you need help running your analyses
+Please contact us if you need help running your analyses. Also we have developed an **extended version** for our collaborators with the following additional features:
+* Interactive web-based visualization
+* Download FASTA of target regions
+* Strand specific CpGs
+* Automatic mapping of primers
+* Restriction enzyme positions
+* Start using web frontend
+* Pattern visualization and analysis
+
 
 ## Publication
 TABSAT is published:<br/>
