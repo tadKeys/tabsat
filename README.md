@@ -63,11 +63,12 @@ Test data is available [here](test_data)
 * Check out the project (git clone)
 * Download the reference genome
  * Human
-   * Broad: ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.gz
-    * ENSEMBL: ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
-     * NCBI: ftp://ftp.ncbi.nlm.nih.gov/genbank/genomes/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37.p13/seqs_for_alignment_pipelines/GCA_000001405.14_GRCh37.p13_no_alt_analysis_set.fna.gz
+   * UCSC: http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit <br/>
+     Download the twoBitToFa from here: http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
+   * NCBI: ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gz
  * Mouse
     * USCS: http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.2bit
+* Please make sure that the reference genome uses a <b>"chr" prefix</b>
 * Put the reference genome file into the correct folder
   * Human<br/>
   tabsat/reference/human/hg19/hg19.fasta
