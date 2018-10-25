@@ -18,7 +18,11 @@ SCRIPT_METH_BOWTIE2="${TOOLS}/bismark_original/bismark_methylation_extractor" #o
 SCRIPT_METH_TMAP="${TOOLS}/bismark_tmap/bismark_methylation_extractor"
 
 QC_MODULE="${BASE_DIR}/01_qc.sh"
+FIX_SAM_FILE_CHR="${TOOLS}/ait/fix_sam_chr.py"
 FINAL_TABLE="${TOOLS}/ait/create_final_table.py"
+
+echo "BASE_DIR: ${BASE_DIR}"
+echo "export PATH=\"${TOOLS}/iontorrent/:$PATH\""
 
 export PATH="${TOOLS}/iontorrent/:$PATH"
 export PATH="${TOOLS}/bowtie2/bowtie2-2.2.4/:$PATH"
@@ -279,7 +283,18 @@ fi
 echo "-- ... done with bismark."
 
 
-SAM_FILE="${outputfolder}/${FILENAME}*.sam"
+SAM_FILE_NAME=$(find ${outputfolder} -name "${FILENAME}*.sam" -type f -printf '%P\n')
+echo "-- SAM_FILE_NAME: ${SAM_FILE_NAME}"
+
+SAM_FILE="${outputfolder}/${SAM_FILE_NAME}"
+echo "-- SAM_FILE: ${SAM_FILE}"
+
+## Fix the SAM file if needed -> add "chr" to chromosome information
+SAM_FILE_FIXED="${SAM_FILE}.fixed"
+
+cp "${SAM_FILE}" "${SAM_FILE}.original"
+python ${FIX_SAM_FILE_CHR} ${SAM_FILE} ${SAM_FILE_FIXED}
+mv ${SAM_FILE_FIXED} ${SAM_FILE}
 
 
 ## Copy the sam file away to preserve

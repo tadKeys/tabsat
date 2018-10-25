@@ -290,8 +290,6 @@ do
     fi
 
 
-
-
     echo -e "\nCopying coverage files"
     echo "cp ${current_dir}/*.cov $COV_DIR"
     /bin/bash -c "cp ${current_dir}/*.cov ${COV_DIR}/"
@@ -311,12 +309,12 @@ do
 
 
     current_sam=`ls ${current_dir}/*sam`
-
+    echo -e "\nCurrent_sam: ${current_sam}"
 
     echo -e "\nRemoving all reads with coverage 1"
 
     ## Convert target list to BED
-    echo "convert target list to bed"
+    echo "Convert target list to bed"
     sed "s/$/\t-$f/" ${TARGET_LIST} | awk '{ print $2"\t"$3"\t"$4"\t"$1"\t"$6"\t"$5}' - | tail -n +2 | ${SORTBED} -i - > "${current_dir}/target_list_for_cov_one.bed"
 
     echo ""

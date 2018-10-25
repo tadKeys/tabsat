@@ -169,12 +169,12 @@ for file in *.target; do
 	rm $file.json
 done
 
-echo "- Patternmap: removing *.log, *.target, *.jsons"
+echo "- Patternmap: removing *.log, *.target, *.json"
 pwd
 
 rm *.log
 rm *.target
-rm *.jsons
+rm *.json
 
 for i in *.json
 do
@@ -184,7 +184,7 @@ done
 sed -i s/.$// targets.json
 echo "}" >> targets.json
 
-rm Target*
+rm -f Target*
 
 cp ${HOMEDIR}/Patternmap.html ${OUTDIR}/Patternmap.html
 sed -i -e "/var all =/r targets.json" ${OUTDIR}/Patternmap.html
