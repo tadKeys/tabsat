@@ -111,7 +111,8 @@ plotting <- function(x){
 	return()
     }
 
-    dataset$variable <- factor(dataset$variable, levels=dataset$variable)
+    ## Removed
+    #dataset$variable <- factor(dataset$variable, levels=dataset$variable)
 
 
     pdf(file = paste("PLOTS/",library_dir,"_",aligner,"_",plottype,"___",Name,".pdf",sep=""), width=pixelw, height = pixelh)
@@ -140,7 +141,7 @@ warnings()
 data <- read.csv("ResultMethylList.csv")
 data <- subset(data, select=(names(data)[grep('^Name|^chr|^pos|^Reads...ME', names(data))]))
 dfs <- split(data, f=data[, "Name"])
-lapply(dfs, function(x) write.csv(x,row.names= FALSE, quote = FALSE,na = "NA", file=paste0(x[1,1], ".csv")))
+lapply(dfs, function(x) {write.csv(x,row.names= FALSE, quote = FALSE,na = "NA", file=paste0(x[1,1], ".csv")); print("Wrote file")})
 
 
 ################################### Create proportional & adapted plot for every target ##############################
