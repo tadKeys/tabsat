@@ -7,7 +7,7 @@ usage () {
 echo -e "\nPreparing SampleComparison for Patternmap"
 
 #Filerting of parameters
-while getopts "hi:s:t:a:" option; do
+while getopts "hi:s:t:a:l:" option; do
     case "$option" in
 	h) usage
 	   exit 0 ;;
@@ -15,6 +15,7 @@ while getopts "hi:s:t:a:" option; do
 	s) SAMPLEDIR=${OPTARG} ;;
 	t) TARGET_LIST=${OPTARG} ;;
 	a) ALIGNER=${OPTARG} ;;
+	l) BS_SEQ=${OPTARG} ;;
 	?) echo "Error: unknown option $OPTARG"
 	   usage
 	   exit 1;;
@@ -26,12 +27,16 @@ TMP_TABSAT_SCRIPT="$TMP_CUR_DIR/../../tabsat"
 TMP_ABS_TABSAT_SCRIPT=`readlink -f $TMP_TABSAT_SCRIPT`
 BASE_DIR=`dirname $TMP_ABS_TABSAT_SCRIPT`
 
+
 HOMEDIR="${BASE_DIR}/tools/Patternmap"
 OUTDIR="${INDIR}/Patternmap"
-SAMPLE_C="${INDIR}/COVERAGE_NONDIR_${ALIGNER}/MethylSubpopulations/Output/SampleComparison.txt"
+SAMPLE_C="${INDIR}/COVERAGE_${BS_SEQ}_${ALIGNER}/MethylSubpopulations/Output/SampleComparison.txt"
 
 echo "INDIR: ${INDIR}"
+echo "SAMPLE_C: ${SAMPLE_C}"
+echo "ALIGNER: ${ALIGNER}"
 echo "OUTDIR: ${OUTDIR}"
+echo "BS_SEQ: ${BS_SEQ}"
 
 ## Create output dir
 mkdir -p $OUTDIR
@@ -51,7 +56,7 @@ sed -i ' s/Z/1/g; s/z/0/g ' All_targets.txt  #ALLE zZ werden geändert
 sample_count=$(wc -l < sample.list)
 
 ## Create target lists
-echo "---- Crete target lists in patternmap"
+echo "---- Create target lists in patternmap"
 while read line; do
 	if [[ $line == Target* ]]; then
 		target=$(echo $line | cut -d ";" -f 1 | sed s/" "/"_"/g)

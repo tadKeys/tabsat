@@ -459,8 +459,8 @@ then
     PATTERNMAP_INPUT_DIR="${OUTPUT_DIR}/copied_inputs"
 fi
 
-echo -e "\n- CMD patternmap: ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST} -a ${ALIGNER}"
-bash ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST} -a ${ALIGNER}
+echo -e "\n- CMD patternmap: ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST} -a ${ALIGNER} -l ${BS_SEQ}"
+bash ${PATTERNMAP} -i ${OUTPUT_DIR} -s ${PATTERNMAP_INPUT_DIR} -t ${TARGET_LIST} -a ${ALIGNER} -l ${BS_SEQ}
 
 
 ############## Copy the plots
