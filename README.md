@@ -95,7 +95,7 @@ apt-get install p7zip-full
 * After installation go to *tabsat/tools/zz_test*
 * Execute
 ```sh
-./test_tabsat.sh
+./test_tabsat_tmap.sh
 ```
 * Inspect output at *tabsat/tabsat_test_output*
 
