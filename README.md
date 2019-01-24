@@ -68,6 +68,7 @@ Test data is available [here](test_data)
    * NCBI: ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gz
  * Mouse
     * USCS: http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.2bit
+* If a 2bit file was downloaded, please extract the file using ```twoBitToFa``` (see http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/ and http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/)
 * Please make sure that the reference genome uses a <b>"chr" prefix</b>
 * Put the reference genome file into the correct folder
   * Human<br/>
